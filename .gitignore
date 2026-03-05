@@ -1,0 +1,48 @@
+# Bỏ qua các thư mục rác của Unity ở bất kỳ cấp độ nào (dùng **/ )
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/[Ll]ogs/
+**/[Uu]ser[Ss]ettings/
+
+# Bỏ qua các file log và file tạm
+*.log
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.suo
+*.vs/
+.vs/
+
+# Bỏ qua các file autogen của Visual Studio / Rider
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.cache
+*.pdb
+*.mdb
+
+# Bỏ qua thư mục build sản phẩm (Vì Thuận có thư mục 04_Builds riêng)
+04_Builds/
+**/[Bb]uilds/
+
+# Bỏ qua các file rác của hệ điều hành
+.DS_Store
+Thumbs.db
+
+# --- CÁC THIẾT LẬP CƠ BẢN CỦA UNITY ---
+*.blend1
+*.blend1.meta
+**/[Mm]emoryCaptures/
+**/[Rr]ecordings/
+**/[Aa]ssets/Plugins/Editor/JetBrains*
+.gradle/
+sysinfo.txt
+mono_crash.*
+*.apk
+*.aab
+*.unitypackage
