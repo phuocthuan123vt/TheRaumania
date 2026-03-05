@@ -22,6 +22,7 @@
 *.unityproj
 *.sln
 *.suo
+
 *.cache
 *.pdb
 *.mdb
