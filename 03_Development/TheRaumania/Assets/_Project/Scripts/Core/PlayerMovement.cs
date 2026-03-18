@@ -16,11 +16,22 @@ public class PlayerMovement : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _inputActions = new PlayerInputActions();
+        _inputActions.Player.Interact.performed += OnInteractPressed;
     }
 
     // Bật/Tắt bộ nhận phím bấm
     private void OnEnable() => _inputActions.Player.Enable();
     private void OnDisable() => _inputActions.Player.Disable();
+
+    private void OnInteractPressed(InputAction.CallbackContext context)
+    {
+        // Khi phím Interact được nhấn, gọi hàm tương tác của tất cả các đối tượng có thể tương tác trong phạm vi
+        Interactable[] interactables = FindObjectsOfType<Interactable>();
+        foreach (var obj in interactables)
+        {
+            obj.TriggerInteraction();
+        }
+    }
 
     private void Update()
     {
