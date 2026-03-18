@@ -26,10 +26,16 @@ public class PlayerMovement : MonoBehaviour
     private void OnInteractPressed(InputAction.CallbackContext context)
     {
         // Khi phím Interact được nhấn, gọi hàm tương tác của tất cả các đối tượng có thể tương tác trong phạm vi
-        Interactable[] interactables = FindObjectsOfType<Interactable>();
-        foreach (var obj in interactables)
+        Collider2D[] closeObjects = Physics2D.OverlapCircleAll(transform.position, 2f);
+
+        foreach (var col in closeObjects)
         {
-            obj.TriggerInteraction();
+            // Kiểm tra xem vật thể chạm phải có script Interactable không
+            if (col.TryGetComponent(out Interactable interactable))
+            {
+                interactable.TriggerInteraction();
+                return; // Tương tác với cái đầu tiên tìm thấy rồi nghỉ, không chạy tiếp
+            }
         }
     }
 
