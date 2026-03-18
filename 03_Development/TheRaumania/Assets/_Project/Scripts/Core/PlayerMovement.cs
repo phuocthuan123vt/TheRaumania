@@ -16,11 +16,28 @@ public class PlayerMovement : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _inputActions = new PlayerInputActions();
+        _inputActions.Player.Interact.performed += OnInteractPressed;
     }
 
     // Bật/Tắt bộ nhận phím bấm
     private void OnEnable() => _inputActions.Player.Enable();
     private void OnDisable() => _inputActions.Player.Disable();
+
+    private void OnInteractPressed(InputAction.CallbackContext context)
+    {
+        // Khi phím Interact được nhấn, gọi hàm tương tác của tất cả các đối tượng có thể tương tác trong phạm vi
+        Collider2D[] closeObjects = Physics2D.OverlapCircleAll(transform.position, 2f);
+
+        foreach (var col in closeObjects)
+        {
+            // Kiểm tra xem vật thể chạm phải có script Interactable không
+            if (col.TryGetComponent(out Interactable interactable))
+            {
+                interactable.TriggerInteraction();
+                return; // Tương tác với cái đầu tiên tìm thấy rồi nghỉ, không chạy tiếp
+            }
+        }
+    }
 
     private void Update()
     {
