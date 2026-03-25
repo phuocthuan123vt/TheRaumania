@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
@@ -10,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D _rb;
     private Vector2 _moveInput;
     private PlayerInputActions _inputActions; // Tên class sinh ra ở Bước 2
+    private Animator _anim;
     #endregion
 
     private void Awake()
@@ -17,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _inputActions = new PlayerInputActions();
         _inputActions.Player.Interact.performed += OnInteractPressed;
+        _anim = GetComponentInChildren<Animator>();
     }
 
     // Bật/Tắt bộ nhận phím bấm
@@ -43,6 +46,16 @@ public class PlayerMovement : MonoBehaviour
     {
         // Đọc giá trị từ phím WASD (Trả về Vector2: X là ngang, Y là dọc)
         _moveInput = _inputActions.Player.Move.ReadValue<Vector2>();
+        if (_moveInput != Vector2.zero)
+        {
+            _anim.SetFloat("MoveX", _moveInput.x);
+            _anim.SetFloat("MoveY", _moveInput.y);
+            _anim.SetBool("IsMoving", true);
+        }
+        else
+        {
+            _anim.SetBool("IsMoving", false);
+        }
     }
 
     private void FixedUpdate()

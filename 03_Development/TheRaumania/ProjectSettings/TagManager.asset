@@ -8,11 +8,11 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Tilemap_Floor
   - Water
   - UI
-  - 
-  - 
+  - Tilemap_Walls
+  - Tilemap_Furniture
   - 
   - 
   - 
