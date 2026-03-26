@@ -8,13 +8,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Tilemap_Floor
+  - 
   - Water
   - UI
+  - Tilemap_Floor
   - Tilemap_Walls
-  - Tilemap_Furniture
-  - 
-  - 
+  - Tilemap_Furnitures
+  - Player
   - 
   - 
   - 
@@ -40,4 +40,22 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Ground
+    uniqueID: 3625487235
+    locked: 0
+  - name: Floor
+    uniqueID: 3463606867
+    locked: 0
+  - name: Walls
+    uniqueID: 2340507045
+    locked: 0
+  - name: Furniture
+    uniqueID: 3816894325
+    locked: 0
+  - name: Entities
+    uniqueID: 3610184133
+    locked: 0
+  - name: UI
+    uniqueID: 728096353
     locked: 0
