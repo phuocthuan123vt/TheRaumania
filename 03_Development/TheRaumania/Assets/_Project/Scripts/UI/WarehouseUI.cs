@@ -28,10 +28,15 @@ public class WarehouseUI : MonoBehaviour
         ToggleWarehouse(true);
     }
 
-    private void ToggleWarehouse(bool isOpen)
+    public void ToggleWarehouse(bool isOpen)
     {
         warehousePanel.SetActive(isOpen);
         if (isOpen) RefreshUI();
+    }
+
+    public void ToggleWarehouse()
+    {
+        ToggleWarehouse(!warehousePanel.activeSelf);
     }
 
     public void RefreshUI()
