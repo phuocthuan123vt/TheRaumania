@@ -52,4 +52,28 @@ public class WarehouseManager : MonoBehaviour
 
         Debug.Log($"Đã nhập {qty} {item.itemName} vào kho {item.preferredStorage}");
     }
+
+    public void TakeItem(StoredItem item)
+    {
+        item.quantity--;
+
+        // Nếu hết hàng thì xóa khỏi danh sách tương ứng
+        if (item.quantity <= 0)
+        {
+            if (item.itemData.preferredStorage == StorageType.Cold)
+                coldStorage.Remove(item);
+            else
+                dryStorage.Remove(item);
+        }
+        Debug.Log($"Đã lấy 1 {item.itemData.itemName} ra để nấu nướng!");
+    }
+
+    public void OnHourPassed()
+    {
+        // Mỗi giờ trôi qua, giảm độ tươi mạnh hơn (ví dụ giảm 5 điểm)
+        foreach (var item in dryStorage) item.currentFreshness -= 1;
+        foreach (var item in coldStorage) item.currentFreshness -= 0.5f; // Kho lạnh giảm ít hơn
+
+        Debug.Log("Một giờ game đã trôi qua, thực phẩm đang héo dần...");
+    }
 }
