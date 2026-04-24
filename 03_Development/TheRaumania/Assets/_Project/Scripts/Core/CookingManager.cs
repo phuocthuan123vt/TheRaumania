@@ -1,61 +1,51 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
-
 public class CookingManager : MonoBehaviour
 {
     public static CookingManager Instance;
-
     [Header("Minigame Panels")]
     public PrepMinigame mg1_Prep;
     public SlicingMinigame mg2_Slicing;
     public FryingMinigame mg3_Frying;
-
-    [Header("UI Panels")]
-    public GameObject pnl_RecipeBook;
-
     private RecipeSO _selectedRecipe;
     private float _mg1Score, _mg2Score, _mg3Score;
     private float _avgFreshness;
-
     private void Awake()
     {
         if (Instance == null) Instance = this;
     }
-
     public void OpenRecipeBook()
     {
-        pnl_RecipeBook.SetActive(true);
-        _selectedRecipe = null; // Reset mỗi lần mở
+        _selectedRecipe = null;
+        CookingEvents.OnOpenRecipeBook?.Invoke();
     }
-
     public void SelectRecipe(RecipeSO recipe)
     {
         _selectedRecipe = recipe;
+        CookingEvents.OnRecipeSelected?.Invoke(recipe);
         Debug.Log("<color=cyan>Đã chọn món: </color>" + recipe.dishName);
     }
-
     public void OnClickStartCooking()
     {
         if (_selectedRecipe == null)
         {
+            CookingEvents.OnStartCookingFailed_NoRecipe?.Invoke();
             Debug.Log("<color=red>Chưa chọn món ông ơi!</color>");
             return;
         }
-
         if (CanCook(_selectedRecipe))
         {
-            pnl_RecipeBook.SetActive(false);
+            CookingEvents.OnStartCookingSuccess?.Invoke();
             StartStep1();
         }
         else
         {
+            CookingEvents.OnStartCookingFailed_NoIngredients?.Invoke();
             Debug.Log("<color=orange>Alex ơi, thiếu nguyên liệu rồi!</color>");
         }
     }
-
     private bool CanCook(RecipeSO recipe)
     {
-        // Tạo bản sao túi đồ để kiểm tra
         List<StoredItem> playerInv = new List<StoredItem>(PlayerInventory.Instance.carriedItems);
         foreach (var req in recipe.ingredientsRequired)
         {
@@ -65,27 +55,46 @@ public class CookingManager : MonoBehaviour
         }
         return true;
     }
-
-    // --- LUỒNG CHUYỂN BƯỚC ---
+    private void OnEnable()
+    {
+        mg1_Prep.OnStepDone += HandlePrepDone;
+        mg2_Slicing.OnStepDone += HandleSlicingDone;
+        mg3_Frying.OnStepDone += HandleFryingDone;
+    }
+    private void OnDisable()
+    {
+        mg1_Prep.OnStepDone -= HandlePrepDone;
+        mg2_Slicing.OnStepDone -= HandleSlicingDone;
+        mg3_Frying.OnStepDone -= HandleFryingDone;
+    }
+    private void HandlePrepDone(float score)
+    {
+        _mg1Score = score;
+        StartStep2();
+    }
+    private void HandleSlicingDone(float score)
+    {
+        _mg2Score = score;
+        StartStep3();
+    }
+    private void HandleFryingDone(float score)
+    {
+        _mg3Score = score;
+        FinalizeDish();
+    }
     void StartStep1()
     {
         _avgFreshness = CalculateFreshness();
-        mg1_Prep.OnStepDone = (s) => { _mg1Score = s; StartStep2(); };
         mg1_Prep.StartGame(_avgFreshness);
     }
-
     void StartStep2()
     {
-        mg2_Slicing.OnStepDone = (s) => { _mg2Score = s; StartStep3(); };
         mg2_Slicing.StartGame(_avgFreshness);
     }
-
     void StartStep3()
     {
-        mg3_Frying.OnStepDone = (s) => { _mg3Score = s; FinalizeDish(); };
         mg3_Frying.StartGame(_avgFreshness);
     }
-
     void FinalizeDish()
     {
         float avgSkill = (_mg1Score + _mg2Score + _mg3Score) / 3f;
@@ -95,20 +104,17 @@ public class CookingManager : MonoBehaviour
         float sFinal = (0.6f * mAvg + 0.4f * qFresh) / H;
         float finalScore = Mathf.Clamp01(sFinal) * 100f;
         float stars = finalScore / 20f;
-
         foreach (BaseItemSO req in _selectedRecipe.ingredientsRequired)
         {
             StoredItem itemInInv = PlayerInventory.Instance.carriedItems.Find(x => x.itemData.id == req.id);
             if (itemInInv != null)
             {
                 itemInInv.quantity--; 
-
                 if (itemInInv.quantity <= 0)
                 {
                     PlayerInventory.Instance.carriedItems.Remove(itemInInv);
                 }
             }
-
             StoredItem itemInBar = HotbarManager.Instance.items.Find(x => x.itemData.id == req.id);
             if (itemInBar != null)
             {
@@ -120,7 +126,6 @@ public class CookingManager : MonoBehaviour
             }
         }
         HotbarManager.Instance.RefreshUI();
-
         if (_selectedRecipe.dishResultSO != null)
         {
             HotbarManager.Instance.AddDish(_selectedRecipe.dishResultSO, stars);
@@ -129,10 +134,10 @@ public class CookingManager : MonoBehaviour
         {
             Debug.LogError("LỖI: chưa kéo Dish Result SO vào file công thức " + _selectedRecipe.dishName);
         }
+        CookingEvents.OnDishFinalized?.Invoke(_selectedRecipe, finalScore, stars);
         Debug.Log($"<color=yellow>HOÀN THÀNH: {_selectedRecipe.dishName} - Score: {finalScore:F1} - Rating: {stars:F1} SAO</color>");
         _selectedRecipe = null; 
     }
-
     float CalculateFreshness()
     {
         if (PlayerInventory.Instance.carriedItems.Count == 0) return 100;
@@ -140,10 +145,9 @@ public class CookingManager : MonoBehaviour
         foreach (var i in PlayerInventory.Instance.carriedItems) total += i.currentFreshness;
         return total / PlayerInventory.Instance.carriedItems.Count;
     }
-
     public void CloseRecipeBook()
     {
-        pnl_RecipeBook.SetActive(false);
         _selectedRecipe = null;
+        CookingEvents.OnCloseRecipeBook?.Invoke();
     }
 }

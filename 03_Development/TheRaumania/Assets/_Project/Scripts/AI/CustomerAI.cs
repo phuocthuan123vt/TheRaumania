@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
+using BehaviorTree;
 
 public class CustomerAI : MonoBehaviour
 {
@@ -22,6 +24,12 @@ public class CustomerAI : MonoBehaviour
     private float _targetSitX; // Lưu hướng nhìn khi ngồi (-1 hoặc 1)
     private float _dishStars;  // Lưu số sao món ăn nhận được
     private bool _isPatienceActive = true;
+    private bool _hasOrdered = false;
+    private bool _hasReceivedFood = false;
+    private bool _isDoneEating = false;
+    
+    // Behavior Tree
+    private Node _rootNode;
 
     [Header("Order UI")]
     public RecipeSO wantedRecipe;
@@ -44,25 +52,69 @@ public class CustomerAI : MonoBehaviour
     {
         currentState = CustomerState.Queueing;
         StartCoroutine(PatienceRoutine());
+        ConstructBehaviorTree();
+    }
+
+    private void ConstructBehaviorTree()
+    {
+        // 1. Nhánh Xếp hàng & Chờ bàn (Tượng trưng, thường do System bên ngoài cấp bàn)
+        ActionNode queueNode = new ActionNode(() =>
+        {
+            if (currentState == CustomerState.Queueing) return NodeState.Running;
+            return NodeState.Success;
+        });
+
+        // 2. Nhánh Đi tới bàn
+        ActionNode walkToTableNode = new ActionNode(() =>
+        {
+            if (currentState != CustomerState.WalkingToTable) return NodeState.Failure;
+
+            if (!_agent.pathPending && _agent.remainingDistance < 0.1f)
+            {
+                OnArrivedAtTable();
+                return NodeState.Success;
+            }
+            return NodeState.Running;
+        });
+
+        // 3. Nhánh Order & Chờ phục vụ
+        ActionNode waitOrderTakeNode = new ActionNode(() =>
+        {
+            if (currentState == CustomerState.Ordering) return NodeState.Running;
+            if (_hasOrdered) return NodeState.Success;
+            return NodeState.Failure;
+        });
+
+        ActionNode waitFoodNode = new ActionNode(() =>
+        {
+            if (currentState == CustomerState.WaitingForFood) return NodeState.Running;
+            if (_hasReceivedFood) return NodeState.Success;
+            return NodeState.Failure;
+        });
+
+        Sequence eatingSequence = new Sequence(new List<Node>() 
+        { 
+            waitOrderTakeNode, 
+            waitFoodNode 
+        });
+
+        // 4. Ghép cây
+        _rootNode = new Sequence(new List<Node>
+        {
+            queueNode,
+            walkToTableNode,
+            eatingSequence
+        });
     }
 
     private void Update()
     {
         UpdateVisuals();
-
-        // Kiểm tra nếu đã đi đến bàn thành công
-        if (currentState == CustomerState.WalkingToTable)
-        {
-            if (!_agent.pathPending && _agent.remainingDistance < 0.1f)
-            {
-                OnArrivedAtTable();
-            }
-        }
+        _rootNode?.Evaluate();
     }
 
     #region AI Logic Flow
 
-    // Giảm kiên nhẫn mỗi giây (GDD trang 10)
     IEnumerator PatienceRoutine()
     {
         while (currentPatience > 0 && _isPatienceActive)
@@ -121,26 +173,24 @@ public class CustomerAI : MonoBehaviour
         }
     }
 
-    // Alex nhấn E lần 2 tại bàn để lấy order
     public void TakeOrder()
     {
         if (currentState == CustomerState.Ordering)
         {
+            _hasOrdered = true;
             currentState = CustomerState.WaitingForFood;
             Debug.Log("Alex đã nhận order. Khách đang đợi món.");
         }
     }
 
-    // Alex bưng món ra nhấn E lần 3
-    public void ReceiveFood(BaseItemSO dish, float stars) // Thêm tham số dish
+    public void ReceiveFood(BaseItemSO dish, float stars) 
     {
         if (currentState == CustomerState.WaitingForFood)
         {
+            _hasReceivedFood = true;
             orderBubble.SetActive(false);
             _dishStars = stars;
             currentState = CustomerState.Eating;
-
-            // Hiện thông báo món ăn nhận được
             if (txtStatus != null)
                 Debug.Log($"Khách nhận món: {dish.itemName} ({stars:F1} sao)");
 
@@ -150,14 +200,13 @@ public class CustomerAI : MonoBehaviour
 
     IEnumerator EatRoutine()
     {
-        yield return new WaitForSeconds(5f); // Thời gian ăn
+        yield return new WaitForSeconds(5f); 
         ProcessPayment();
     }
 
     void ProcessPayment()
     {
-        // Tính tiền: Base + Tip dựa trên Stars và Profile (GDD trang 5)
-        int baseRC = 100;
+        int baseRC = (wantedRecipe != null && wantedRecipe.dishResultSO != null) ? wantedRecipe.dishResultSO.basePrice : 100;
         float tip = (_dishStars * 10f) * profile.tipMultiplier;
         PlayerData.rCredit += Mathf.RoundToInt(baseRC + tip);
 
@@ -174,7 +223,7 @@ public class CustomerAI : MonoBehaviour
 
         _anim.SetBool("IsSitting", false);
         _agent.enabled = true;
-        _agent.SetDestination(new Vector3(0, -10, 0)); // Đi ra cửa
+        _agent.SetDestination(new Vector3(0, -10, 0));
         Destroy(gameObject, 10f);
     }
 

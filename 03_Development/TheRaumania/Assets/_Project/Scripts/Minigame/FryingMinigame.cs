@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
@@ -27,9 +27,11 @@ public class FryingMinigame : MinigameBase
     private List<float> _cookSamples = new List<float>();
     private float _sampleTimer;
 
+    public override MinigameType GetMinigameType() => MinigameType.Frying;
+
     public override void StartGame(float freshness)
     {
-        minigamePanel.SetActive(true);
+        base.StartGame(freshness);
         _timer = 5f; // Cần giữ 5 giây thành công
         _isActive = true;
         _sampleTimer = 0;

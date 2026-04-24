@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 public class LevelManager : MonoBehaviour 
 {
     public static LevelManager Instance;
@@ -21,9 +21,11 @@ public class LevelManager : MonoBehaviour
                 break;
 
             case CustomerAI.CustomerState.WaitingForFood:
-                if (HotbarManager.Instance.items.Count > 0)
+                int currentSlot = HotbarManager.Instance.SelectedSlotIndex;
+
+                if (HotbarManager.Instance.items.Count > currentSlot && currentSlot >= 0)
                 {
-                    var itemOnHand = HotbarManager.Instance.items[0];
+                    var itemOnHand = HotbarManager.Instance.items[currentSlot];
 
                     if (itemOnHand.itemData.id == customer.wantedRecipe.dishResultSO.id)
                     {
@@ -32,7 +34,12 @@ public class LevelManager : MonoBehaviour
                         float stars = itemOnHand.currentFreshness / 20f;
                         customer.ReceiveFood(itemOnHand.itemData, stars);
 
-                        HotbarManager.Instance.items.RemoveAt(0);
+                        itemOnHand.quantity--;
+                        if (itemOnHand.quantity <= 0)
+                        {
+                            HotbarManager.Instance.items.RemoveAt(currentSlot);
+                        }
+                        
                         HotbarManager.Instance.RefreshUI();
                     }
                     else

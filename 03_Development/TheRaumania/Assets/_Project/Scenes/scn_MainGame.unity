@@ -442,7 +442,7 @@ Transform:
   m_GameObject: {fileID: 12856701}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.4, y: 3.1, z: -10}
+  m_LocalPosition: {x: 100, y: 27, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2185,7 +2185,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cc3ef058d617fb45a90894bf69c5a67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minigamePanel: {fileID: 266223322}
   dirtPoints:
   - {fileID: 687926931}
   - {fileID: 745156234}
@@ -19719,7 +19718,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.4, y: 3.1, z: -10}
+  m_LocalPosition: {x: 100, y: 27, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19873,15 +19872,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a9d5b59d42f2134282c5ca621f8e648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minigamePanel: {fileID: 524243916}
   tempSlider: {fileID: 1511532796}
   imgTargetZone: {fileID: 283926886}
   fillImage: {fileID: 1286086675}
-  gravity: 0.8
-  liftForce: 1.2
+  gravity: 0.6
+  liftForce: 0.9
   zoneSize: 0.2
-  smoothTime: 0.5
-  changeInterval: 1.5
+  smoothTime: 0.8
+  changeInterval: 2.5
 --- !u!1 &542545426
 GameObject:
   m_ObjectHideFlags: 0
@@ -20265,7 +20263,7 @@ Transform:
   m_GameObject: {fileID: 573715149}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.4, y: 3.1, z: 0}
+  m_LocalPosition: {x: 100, y: 27, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -20582,6 +20580,7 @@ MonoBehaviour:
   contentArea: {fileID: 1517274918}
   allRecipes:
   - {fileID: 11400000, guid: 6a2a2004100802a45b919e7104d8f2e3, type: 2}
+  - {fileID: 11400000, guid: da4076304084d874c998e830eacb2892, type: 2}
 --- !u!1001 &607990744
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24381,7 +24380,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f35498e8c2419b645a688f11133eb7bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minigamePanel: {fileID: 896343809}
   slider: {fileID: 1253061858}
   imgTargetZone: {fileID: 403354109}
   baseSpeed: 2
@@ -25737,6 +25735,7 @@ GameObject:
   - component: {fileID: 1172764392}
   - component: {fileID: 1172764393}
   - component: {fileID: 1172764394}
+  - component: {fileID: 1172764395}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -25800,6 +25799,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4cd1f606bfc762642801721d92475fd4, type: 2}
   - {fileID: 11400000, guid: 5a61a84f4ca07dc418727a8b41ff2c8a, type: 2}
   - {fileID: 11400000, guid: afcf3c5aa66ac384797f8aadcca39ced, type: 2}
+  - {fileID: 11400000, guid: 0d659f23159210a45b988ec474e2dc74, type: 2}
+  - {fileID: 11400000, guid: 9a454a6afdde5bb4295ef6efa71b2401, type: 2}
   currentCart: []
   totalStockLimit: 100
 --- !u!114 &1172764389
@@ -25817,7 +25818,6 @@ MonoBehaviour:
   mg1_Prep: {fileID: 266223326}
   mg2_Slicing: {fileID: 896343811}
   mg3_Frying: {fileID: 524243920}
-  pnl_RecipeBook: {fileID: 605213905}
 --- !u!114 &1172764390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25904,6 +25904,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89abea2a68e2c2c44ba164976b58c15c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1172764395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1172764385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3f3fba79167af549bdc0867091d2b6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pnl_RecipeBook: {fileID: 605213905}
+  pnl_PrepMinigame: {fileID: 266223322}
+  pnl_SlicingMinigame: {fileID: 896343809}
+  pnl_FryingMinigame: {fileID: 524243916}
 --- !u!1 &1214907619
 GameObject:
   m_ObjectHideFlags: 0

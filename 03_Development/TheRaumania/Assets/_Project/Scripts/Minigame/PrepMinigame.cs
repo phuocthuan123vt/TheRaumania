@@ -1,16 +1,15 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 public class PrepMinigame : MinigameBase
 {
     public GameObject[] dirtPoints;
     public float spawnRadius = 250f;
     private int _remainingPoints;
-
+    public override MinigameType GetMinigameType() => MinigameType.Prep;
     public override void StartGame(float freshness)
     {
-        minigamePanel.SetActive(true);
+        base.StartGame(freshness);
         _remainingPoints = dirtPoints.Length;
-
         foreach (GameObject p in dirtPoints)
         {
             p.SetActive(true);
@@ -24,13 +23,11 @@ public class PrepMinigame : MinigameBase
             }
         }
     }
-
     public void OnPointClicked(GameObject point)
     {
         point.SetActive(false);
         _remainingPoints--;
         Debug.Log("Đã dọn 1 vết bẩn, còn lại: " + _remainingPoints);
-
         if (_remainingPoints <= 0)
         {
             Complete(100);
