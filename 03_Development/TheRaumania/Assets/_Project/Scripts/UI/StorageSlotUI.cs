@@ -7,7 +7,7 @@ public class StorageSlotUI : MonoBehaviour
     public Image imgIcon;
     public TextMeshProUGUI txtQty;
     public Slider slidFreshness;
-    public Image fillImage; // Kéo phần Fill của Slider vào đây để đổi màu
+    public Image fillImage; 
     private StoredItem _targetItem;
     private Button _btn;
 
@@ -39,13 +39,8 @@ public class StorageSlotUI : MonoBehaviour
     {
         if (_targetItem.quantity > 0)
         {
-            // 1. Trừ 1 món trong kho
             WarehouseManager.Instance.TakeItem(_targetItem);
-
-            // 2. Bỏ vào túi của Alex
             PlayerInventory.Instance.AddItem(_targetItem);
-
-            // 3. Cập nhật lại UI kho (để số lượng nhảy lùi)
             FindObjectOfType<WarehouseUI>().RefreshUI();
         }
     }

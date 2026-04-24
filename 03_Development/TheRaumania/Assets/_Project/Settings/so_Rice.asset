@@ -15,7 +15,8 @@ MonoBehaviour:
   id: rice
   itemName: "G\u1EA1o"
   icon: {fileID: 21300000, guid: 810143bb5d1e977488706d8e5689d1e3, type: 3}
-  basePrice: 20
-  isPerishable: 0
-  decayRate: 1
+  basePrice: 3
+  isPerishable: 1
+  decayRate: 2
   preferredStorage: 0
+  itemType: 

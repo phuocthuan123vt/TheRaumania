@@ -89,9 +89,11 @@ public class CookingManager : MonoBehaviour
     void FinalizeDish()
     {
         float avgSkill = (_mg1Score + _mg2Score + _mg3Score) / 3f;
-
-        float finalScore = (avgSkill * 0.7f) + (_avgFreshness * 0.3f);
-
+        float H = 0.95f;
+        float mAvg = avgSkill / 100f;
+        float qFresh = _avgFreshness / 100f;
+        float sFinal = (0.6f * mAvg + 0.4f * qFresh) / H;
+        float finalScore = Mathf.Clamp01(sFinal) * 100f;
         float stars = finalScore / 20f;
 
         foreach (BaseItemSO req in _selectedRecipe.ingredientsRequired)
@@ -127,7 +129,7 @@ public class CookingManager : MonoBehaviour
         {
             Debug.LogError("LỖI: chưa kéo Dish Result SO vào file công thức " + _selectedRecipe.dishName);
         }
-        Debug.Log($"<color=yellow>HOÀN THÀNH: {_selectedRecipe.dishName} - Đánh giá: {stars:F1} SAO</color>");
+        Debug.Log($"<color=yellow>HOÀN THÀNH: {_selectedRecipe.dishName} - Score: {finalScore:F1} - Rating: {stars:F1} SAO</color>");
         _selectedRecipe = null; 
     }
 
