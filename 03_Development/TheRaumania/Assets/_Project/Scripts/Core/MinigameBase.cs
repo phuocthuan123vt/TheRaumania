@@ -1,16 +1,19 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
 public abstract class MinigameBase : MonoBehaviour
 {
-    public Action<float> OnStepDone;
-    [SerializeField] protected GameObject minigamePanel;
+    public event Action<float> OnStepDone;
+    public abstract MinigameType GetMinigameType();
 
-    public abstract void StartGame(float freshness);
+    public virtual void StartGame(float freshness)
+    {
+        CookingEvents.OnMinigameStarted?.Invoke(GetMinigameType());
+    }
 
     protected void Complete(float score)
     {
-        minigamePanel.SetActive(false);
+        CookingEvents.OnMinigameCompleted?.Invoke(GetMinigameType());
         OnStepDone?.Invoke(score);
     }
 }

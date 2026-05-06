@@ -15,7 +15,8 @@ MonoBehaviour:
   id: morning_glory
   itemName: "Rau mu\u1ED1ng"
   icon: {fileID: 21300000, guid: 8d9bc3e0bd32cc647bb6a03cb72cbb1f, type: 3}
-  basePrice: 15
-  isPerishable: 0
-  decayRate: 4
+  basePrice: 4
+  isPerishable: 1
+  decayRate: 30
   preferredStorage: 0
+  itemType: 

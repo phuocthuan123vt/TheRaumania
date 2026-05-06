@@ -1,22 +1,16 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
-
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
-
     [Header("Main HUD Components")]
-    public GameObject phoneHUD;      // HUD điện thoại mới
-    public GameObject hotbarHUD;     // Thanh công cụ 10 ô
-
+    public GameObject phoneHUD;     
+    public GameObject hotbarHUD;     
     [Header("Overlay Panels")]
-    public List<GameObject> overlayPanels; // Danh sách các bảng (Shop, Warehouse, Recipe, Minigames)
-
+    public List<GameObject> overlayPanels; 
     private void Awake() { Instance = this; }
-
     void Update()
     {
-        // Kiểm tra xem có bất kỳ bảng Menu nào đang mở không
         bool isAnyPanelOpen = false;
         foreach (GameObject panel in overlayPanels)
         {
@@ -26,8 +20,6 @@ public class UIManager : MonoBehaviour
                 break;
             }
         }
-
-        // Nếu có Menu mở -> Ẩn HUD chính. Nếu không -> Hiện HUD chính.
         phoneHUD.SetActive(!isAnyPanelOpen);
         hotbarHUD.SetActive(!isAnyPanelOpen);
     }
