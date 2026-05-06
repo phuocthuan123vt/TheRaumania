@@ -1,8 +1,16 @@
 ﻿using System;
 
+using System.Collections.Generic;
+
 public static class PlayerData
 {
     private static int _rCredit = 1000; // Tiền của người chơi
+
+    // --- DỮ LIỆU ĐÁNH GIÁ (RATING) ---
+    public static float foodQualityScore = 5f;
+    public static float hygieneScore = 10f;
+    public static float decorationScore = 0f;
+    public static Queue<float> satisfactionHistory = new Queue<float>();
 
     public static int RCredit => _rCredit;
 

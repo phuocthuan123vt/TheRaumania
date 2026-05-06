@@ -70,6 +70,10 @@ public class CustomerAI : MonoBehaviour
             if (currentState != CustomerState.Leaving)
             {
                 Debug.Log("<color=red>Khách bỏ về vì hết kiên nhẫn!</color>");
+                // Cho ăn 0 điểm toàn diện vì đợi quá lâu
+                _dishStars = 0f; 
+                SubmitSatisfactionReview();
+
                 // TODO: Chèn logic / animation Angry Emote tại đây
                 OnLeave();
             }
@@ -271,6 +275,9 @@ public class CustomerAI : MonoBehaviour
         }
     }
 
+    public bool isSpecialRequestMet = false; // Để mảng Request xử lý
+    public GameObject dirtPrefab; // Rớt rác
+
     IEnumerator EatRoutine()
     {
         yield return new WaitForSeconds(5f); 
@@ -283,14 +290,59 @@ public class CustomerAI : MonoBehaviour
         float tip = (_dishStars * 10f) * profile.tipMultiplier;
         PlayerData.AddCredit(Mathf.RoundToInt(baseRC + tip));
 
-        Debug.Log($"Khách trả {baseRC + tip} RC và rời quán.");
+        Debug.Log($"Khách trả {baseRC + tip} RC và chuẩn bị Review.");
+
+        SubmitSatisfactionReview();
         
         OnLeave();
+    }
+
+    void SubmitSatisfactionReview()
+    {
+        // 1. Tính % Kiên nhẫn còn lại (ra 10 điểm)
+        float patienceScore = (Mathf.Max(0, currentPatience) / 100f) * 10f;
+        
+        // 2. Tính Điểm Món (dishStars là thang 5 -> nhân 2 ra 10 điểm)
+        float dishScore = Mathf.Clamp(_dishStars * 2f, 0f, 10f);
+
+        // 3. Yêu cầu đặc biệt (Nếu khách VIP có request thì max 10 điểm, không met thì 0)
+        float specialScore = isSpecialRequestMet ? 10f : 0f;
+
+        float satisfaction = 0f;
+
+        switch (profile.type)
+        {
+            case CustomerType.Chill: // Normal
+                satisfaction = (patienceScore * 0.25f) + (dishScore * 0.75f);
+                break;
+            case CustomerType.RichAndRush: // VIP
+                satisfaction = (patienceScore * 0.15f) + (dishScore * 0.65f) + (specialScore * 0.20f);
+                break;
+            case CustomerType.FoodCritic: // Phê bình
+                satisfaction = (patienceScore * 0.10f) + (dishScore * 0.75f) + (specialScore * 0.15f);
+                break;
+        }
+
+        satisfaction = Mathf.Clamp(satisfaction, 0f, 10f);
+        
+        if (RestaurantRatingManager.Instance != null)
+        {
+            RestaurantRatingManager.Instance.SubmitCustomerReview(satisfaction, dishScore);
+        }
     }
 
     void OnLeave()
     {
         _isPatienceActive = false;
+        
+        // --- HYGIENE SYSTEM (ĐÁNH RỚT RÁC LÀM TUỘT VỆ SINH) ---
+        if (dirtPrefab != null && Random.value < 0.3f) // 30% rớt rác
+        {
+            Instantiate(dirtPrefab, transform.position, Quaternion.identity);
+            if (RestaurantRatingManager.Instance != null)
+                RestaurantRatingManager.Instance.DecreaseHygiene(0.5f); // Làm tuột nửa điểm vệ sinh
+        }
+
         if (assignedTable != null) assignedTable.seats[_mySeatIndex].isOccupied = false;
 
         _anim.SetBool("IsSitting", false);

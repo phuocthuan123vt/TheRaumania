@@ -357,7 +357,7 @@ Transform:
   m_GameObject: {fileID: 6691974567820988535}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.39, z: 0}
+  m_LocalPosition: {x: -4.91, y: -6.92, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -476,11 +476,16 @@ MonoBehaviour:
   profile: {fileID: 11400000, guid: 12af80ff4f77b90459844e020ef32dd8, type: 2}
   currentState: 0
   currentPatience: 100
+  hasUpgrade_CallStaff: 0
+  checkoutCounter: {fileID: 0}
   assignedTable: {fileID: 0}
   txtStatus: {fileID: 19686007962745904}
   wantedRecipe: {fileID: 0}
   orderBubble: {fileID: 8081813885055983826}
   imgOrderIcon: {fileID: 4970819830266806757}
+  _mySeatIndex: 0
+  isSpecialRequestMet: 0
+  dirtPrefab: {fileID: 0}
 --- !u!195 &849423647640868490
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -516,10 +521,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactMessage: "Nh\u1EA5n E \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c"
+  interactRange: 2
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 4363543618120473360, guid: 38002bdd260ae4d4fa84dee392d9d802, type: 3}
         m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
         m_MethodName: OnPlayerInteractWithCustomer
         m_Mode: 2

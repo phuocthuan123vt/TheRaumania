@@ -21,6 +21,11 @@ public class GameplayManager : MonoBehaviour
         if (passedData != null)
         {
             PlayerData.SetCredit(passedData.rCredit);
+            PlayerData.foodQualityScore = passedData.foodQualityScore;
+            PlayerData.hygieneScore = passedData.hygieneScore;
+            PlayerData.decorationScore = passedData.decorationScore;
+            PlayerData.satisfactionHistory = new System.Collections.Generic.Queue<float>(passedData.satisfactionHistory);
+            
             Debug.Log($"Vào map thành công! Tiền hiện có: {PlayerData.RCredit} RC");
         }
     }
@@ -57,7 +62,13 @@ public class GameplayManager : MonoBehaviour
         if (string.IsNullOrEmpty(name)) name = $"SaveData_{slotIndex}";
 
         // Tóm lấy tài sản hiện tại
-        GameSaveData newDataToSave = new GameSaveData(name, PlayerData.RCredit);
+        GameSaveData newDataToSave = new GameSaveData(name, PlayerData.RCredit)
+        {
+            foodQualityScore = PlayerData.foodQualityScore,
+            hygieneScore = PlayerData.hygieneScore,
+            decorationScore = PlayerData.decorationScore,
+            satisfactionHistory = new System.Collections.Generic.List<float>(PlayerData.satisfactionHistory)
+        };
         SaveSystem.Save(slotIndex, newDataToSave);
 
         inputSaveName.text = ""; // Xóa input
