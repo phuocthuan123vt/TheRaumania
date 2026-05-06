@@ -20,8 +20,8 @@ public class GameplayManager : MonoBehaviour
         GameSaveData passedData = SaveSystem.Load(0);
         if (passedData != null)
         {
-            PlayerData.rCredit = passedData.rCredit;
-            Debug.Log($"Vào map thành công! Tiền hiện có: {PlayerData.rCredit} RC");
+            PlayerData.SetCredit(passedData.rCredit);
+            Debug.Log($"Vào map thành công! Tiền hiện có: {PlayerData.RCredit} RC");
         }
     }
 
@@ -57,7 +57,7 @@ public class GameplayManager : MonoBehaviour
         if (string.IsNullOrEmpty(name)) name = $"SaveData_{slotIndex}";
 
         // Tóm lấy tài sản hiện tại
-        GameSaveData newDataToSave = new GameSaveData(name, PlayerData.rCredit);
+        GameSaveData newDataToSave = new GameSaveData(name, PlayerData.RCredit);
         SaveSystem.Save(slotIndex, newDataToSave);
 
         inputSaveName.text = ""; // Xóa input

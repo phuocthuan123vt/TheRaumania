@@ -281,7 +281,7 @@ public class CustomerAI : MonoBehaviour
     {
         int baseRC = (wantedRecipe != null && wantedRecipe.dishResultSO != null) ? wantedRecipe.dishResultSO.basePrice : 100;
         float tip = (_dishStars * 10f) * profile.tipMultiplier;
-        PlayerData.rCredit += Mathf.RoundToInt(baseRC + tip);
+        PlayerData.AddCredit(Mathf.RoundToInt(baseRC + tip));
 
         Debug.Log($"Khách trả {baseRC + tip} RC và rời quán.");
         

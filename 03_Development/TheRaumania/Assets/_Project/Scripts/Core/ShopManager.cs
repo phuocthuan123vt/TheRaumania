@@ -39,9 +39,8 @@ public class ShopManager : MonoBehaviour
     {
         int total = 0;
         foreach (var i in currentCart) total += i.TotalPrice;
-        if (PlayerData.rCredit >= total)
+        if (PlayerData.SpendCredit(total))
         {
-            PlayerData.rCredit -= total;
             foreach (var i in currentCart)
             {
                 WarehouseManager.Instance.AddItemToWarehouse(i.itemData, i.quantity);
