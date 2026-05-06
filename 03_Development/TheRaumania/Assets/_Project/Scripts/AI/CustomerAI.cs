@@ -15,6 +15,10 @@ public class CustomerAI : MonoBehaviour
     public CustomerState currentState;
     public float currentPatience = 100f;
 
+    [Header("Behavior Tree Flags")]
+    public bool hasUpgrade_CallStaff = false;
+    public Transform checkoutCounter;
+
     [Header("Tham chiếu Logic")]
     public Table assignedTable;
     public TextMeshProUGUI txtStatus;
@@ -51,81 +55,150 @@ public class CustomerAI : MonoBehaviour
     private void Start()
     {
         currentState = CustomerState.Queueing;
-        StartCoroutine(PatienceRoutine());
+        // Logic trừ Patience giờ sẽ do BT quản lý (không còn dùng Coroutine)
         ConstructBehaviorTree();
     }
 
     private void ConstructBehaviorTree()
     {
-        // 1. Nhánh Xếp hàng & Chờ bàn (Tượng trưng, thường do System bên ngoài cấp bàn)
-        ActionNode queueNode = new ActionNode(() =>
+        // ============================================
+        // NHÁNH 1: FORCED EXIT (Ưu tiên cao nhất)
+        // ============================================
+        ActionNode checkPatienceOut = new ActionNode(() => currentPatience <= 0 ? NodeState.Success : NodeState.Failure);
+        ActionNode exitAction = new ActionNode(() => 
         {
-            if (currentState == CustomerState.Queueing) return NodeState.Running;
-            return NodeState.Success;
-        });
-
-        // 2. Nhánh Đi tới bàn
-        ActionNode walkToTableNode = new ActionNode(() =>
-        {
-            if (currentState != CustomerState.WalkingToTable) return NodeState.Failure;
-
-            if (!_agent.pathPending && _agent.remainingDistance < 0.1f)
+            if (currentState != CustomerState.Leaving)
             {
-                OnArrivedAtTable();
-                return NodeState.Success;
+                Debug.Log("<color=red>Khách bỏ về vì hết kiên nhẫn!</color>");
+                // TODO: Chèn logic / animation Angry Emote tại đây
+                OnLeave();
             }
+            return NodeState.Success; 
+        });
+        Sequence forcedExitSequence = new Sequence(new List<Node> { checkPatienceOut, exitAction });
+
+        // ============================================
+        // NHÁNH 2: VÒNG LẶP PHỤC VỤ (Standard Service)
+        // ============================================
+
+        // 2.1 Wait For Table (Chờ bàn)
+        ActionNode checkIfAtTable = new ActionNode(() => 
+        {
+            if (currentState == CustomerState.Queueing) return NodeState.Failure; 
+            if (currentState == CustomerState.WalkingToTable)
+            {
+                if (!_agent.pathPending && _agent.remainingDistance < 0.1f)
+                {
+                    OnArrivedAtTable();
+                    return NodeState.Success;
+                }
+                return NodeState.Failure;
+            }
+            return NodeState.Success; // Đã tới bàn
+        });
+        ActionNode waitInQueue = new ActionNode(() => 
+        {
+            currentPatience -= profile.patienceDecayRate * Time.deltaTime; // Giảm kiên nhẫn
             return NodeState.Running;
         });
+        Selector waitingForTable = new Selector(new List<Node> { checkIfAtTable, waitInQueue });
 
-        // 3. Nhánh Order & Chờ phục vụ
-        ActionNode waitOrderTakeNode = new ActionNode(() =>
+        // 2.2 Ordering Process (Quá trình chọn món)
+        ActionNode checkOrderTaken = new ActionNode(() => _hasOrdered ? NodeState.Success : NodeState.Failure);
+        ActionNode waitForStaffAction = new ActionNode(() => 
         {
-            if (currentState == CustomerState.Ordering) return NodeState.Running;
-            if (_hasOrdered) return NodeState.Success;
-            return NodeState.Failure;
+            currentPatience -= profile.patienceDecayRate * Time.deltaTime;
+            return NodeState.Running;
+        });
+        Selector orderingProcess = new Selector(new List<Node> { checkOrderTaken, waitForStaffAction });
+
+        // 2.3 Waiting For Food (Chờ đồ ăn lên)
+        ActionNode checkFoodServed = new ActionNode(() => _hasReceivedFood ? NodeState.Success : NodeState.Failure);
+        
+        // 2.3.1 Tương tác khi chờ (Waiting Interaction)
+        ActionNode checkUpgrade = new ActionNode(() => (currentPatience < 50f && hasUpgrade_CallStaff) ? NodeState.Success : NodeState.Failure);
+        ActionNode waveHandAction = new ActionNode(() => 
+        {
+            // TODO: Chạy logic vẫy tay gọi nhân viên (Ask Staff / Wave Hand)
+            return NodeState.Running;
+        });
+        Sequence upgradeInteraction = new Sequence(new List<Node> { checkUpgrade, waveHandAction });
+        ActionNode idleWaitAction = new ActionNode(() => 
+        {
+            currentPatience -= profile.patienceDecayRate * Time.deltaTime;
+            // TODO: Animation Look Around (nếu có)
+            return NodeState.Running;
+        });
+        Selector waitingInteraction = new Selector(new List<Node> { upgradeInteraction, idleWaitAction });
+        Selector waitingForFood = new Selector(new List<Node> { checkFoodServed, waitingInteraction });
+
+        // 2.4 Ăn & tăng Mood (Eat & Boost Mood)
+        ActionNode eatAction = new ActionNode(() => 
+        {
+            if (currentState != CustomerState.Eating) return NodeState.Failure;
+            if (_isDoneEating) return NodeState.Success; 
+            return NodeState.Running; // Trạng thái này sẽ kết thúc bởi Coroutine EatRoutine
         });
 
-        ActionNode waitFoodNode = new ActionNode(() =>
+        // 2.5 Checkout Sequence
+        ActionNode moveToCounter = new ActionNode(() => 
         {
-            if (currentState == CustomerState.WaitingForFood) return NodeState.Running;
-            if (_hasReceivedFood) return NodeState.Success;
-            return NodeState.Failure;
+            if (currentState == CustomerState.Eating) currentState = CustomerState.CheckingOut;
+            if (checkoutCounter != null)
+            {
+                _agent.enabled = true;
+                _anim.SetBool("IsSitting", false);
+                _agent.SetDestination(checkoutCounter.position);
+                if (!_agent.pathPending && _agent.remainingDistance <= 0.1f) return NodeState.Success;
+                return NodeState.Running;
+            }
+            return NodeState.Success; // Nếu chưa gán counter, tính như thể đã tự đi tới quầy
+        });
+        ActionNode payAndTipAction = new ActionNode(() => 
+        {
+            ProcessPayment(); // Gọi hàm thanh toán
+            return NodeState.Success;
+        });
+        ActionNode happyAndLeaveAction = new ActionNode(() => 
+        {
+            // TODO: Play "Happy" Emote
+            currentState = CustomerState.Leaving;
+            return NodeState.Success;
+        });
+        Sequence checkoutSequence = new Sequence(new List<Node> { moveToCounter, payAndTipAction, happyAndLeaveAction });
+
+        // Lắp các Selector lại vào Vòng Lặp Phục Vụ tiêu chuẩn
+        Sequence standardServiceLoop = new Sequence(new List<Node>
+        {
+            waitingForTable,
+            orderingProcess,
+            waitingForFood,
+            eatAction,
+            checkoutSequence
         });
 
-        Sequence eatingSequence = new Sequence(new List<Node>() 
-        { 
-            waitOrderTakeNode, 
-            waitFoodNode 
-        });
-
-        // 4. Ghép cây
-        _rootNode = new Sequence(new List<Node>
+        // ============================================
+        // LẮP RÁP BỘ NÃO TỔNG THỂ (ROOT)
+        // ============================================
+        _rootNode = new Selector(new List<Node>
         {
-            queueNode,
-            walkToTableNode,
-            eatingSequence
+            forcedExitSequence,
+            standardServiceLoop
         });
     }
 
     private void Update()
     {
         UpdateVisuals();
-        _rootNode?.Evaluate();
-    }
 
-    #region AI Logic Flow
-
-    IEnumerator PatienceRoutine()
-    {
-        while (currentPatience > 0 && _isPatienceActive)
+        // Chạy qua Root nếu khách chưa bỏ về
+        if (_isPatienceActive && currentState != CustomerState.Leaving)
         {
-            yield return new WaitForSeconds(1f);
-            currentPatience -= profile.patienceDecayRate;
-
-            if (currentPatience <= 0) OnPatienceOut();
+            _rootNode?.Evaluate();
         }
     }
 
+    #region AI Logic Flow
 
     public void LeadToSeat(Table table, int seatIndex)
     {
@@ -201,7 +274,7 @@ public class CustomerAI : MonoBehaviour
     IEnumerator EatRoutine()
     {
         yield return new WaitForSeconds(5f); 
-        ProcessPayment();
+        _isDoneEating = true; // Báo hiệu ActionNode "eatAction" là đã ăn xong !
     }
 
     void ProcessPayment()
@@ -211,8 +284,7 @@ public class CustomerAI : MonoBehaviour
         PlayerData.rCredit += Mathf.RoundToInt(baseRC + tip);
 
         Debug.Log($"Khách trả {baseRC + tip} RC và rời quán.");
-
-        currentState = CustomerState.Leaving;
+        
         OnLeave();
     }
 
@@ -224,13 +296,7 @@ public class CustomerAI : MonoBehaviour
         _anim.SetBool("IsSitting", false);
         _agent.enabled = true;
         _agent.SetDestination(new Vector3(0, -10, 0));
-        Destroy(gameObject, 10f);
-    }
-
-    void OnPatienceOut()
-    {
-        Debug.Log("<color=red>Khách bỏ về vì hết kiên nhẫn!</color>");
-        OnLeave();
+        Destroy(gameObject, 10f); // Thay đổi vector này thành điểm End Map cho hợp lý.
     }
     #endregion
 
