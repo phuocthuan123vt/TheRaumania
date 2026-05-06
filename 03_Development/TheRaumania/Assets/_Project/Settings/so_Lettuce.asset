@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: lettuce
   itemName: "Rau x\xE0 l\xE1ch"
-  icon: {fileID: 21300000, guid: a8d99941b2eeda94e85b70c8c660438c, type: 3}
+  icon: {fileID: 21300000, guid: 50bfe3bcc95f15846a6b2cafb0c3c9b7, type: 3}
   basePrice: 2
   isPerishable: 1
   decayRate: 30

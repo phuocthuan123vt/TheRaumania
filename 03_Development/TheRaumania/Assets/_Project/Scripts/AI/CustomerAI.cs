@@ -17,12 +17,12 @@ public class CustomerAI : MonoBehaviour
 
     [Header("Tham chiếu Logic")]
     public Table assignedTable;
-    public TextMeshProUGUI txtStatus; // Kéo Text trên đầu NPC vào đây
+    public TextMeshProUGUI txtStatus;
 
     private NavMeshAgent _agent;
     private Animator _anim;
-    private float _targetSitX; // Lưu hướng nhìn khi ngồi (-1 hoặc 1)
-    private float _dishStars;  // Lưu số sao món ăn nhận được
+    private float _targetSitX; 
+    private float _dishStars;  
     private bool _isPatienceActive = true;
     private bool _hasOrdered = false;
     private bool _hasReceivedFood = false;
