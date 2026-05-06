@@ -20580,7 +20580,6 @@ MonoBehaviour:
   contentArea: {fileID: 1517274918}
   allRecipes:
   - {fileID: 11400000, guid: 6a2a2004100802a45b919e7104d8f2e3, type: 2}
-  - {fileID: 11400000, guid: da4076304084d874c998e830eacb2892, type: 2}
 --- !u!1001 &607990744
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25799,8 +25798,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4cd1f606bfc762642801721d92475fd4, type: 2}
   - {fileID: 11400000, guid: 5a61a84f4ca07dc418727a8b41ff2c8a, type: 2}
   - {fileID: 11400000, guid: afcf3c5aa66ac384797f8aadcca39ced, type: 2}
-  - {fileID: 11400000, guid: 0d659f23159210a45b988ec474e2dc74, type: 2}
-  - {fileID: 11400000, guid: 9a454a6afdde5bb4295ef6efa71b2401, type: 2}
   currentCart: []
   totalStockLimit: 100
 --- !u!114 &1172764389
@@ -27173,6 +27170,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactMessage: "Nh\u1EA5n E \u0111\u1EC3 mua h\xE0ng"
+  interactRange: 2
   onInteract:
     m_PersistentCalls:
       m_Calls:
