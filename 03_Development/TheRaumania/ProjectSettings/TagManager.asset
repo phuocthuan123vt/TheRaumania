@@ -50,8 +50,11 @@ TagManager:
   - name: Walls
     uniqueID: 2340507045
     locked: 0
-  - name: Furniture
+  - name: Furniture Collide
     uniqueID: 3816894325
+    locked: 0
+  - name: Furniture No Collide
+    uniqueID: 1317389947
     locked: 0
   - name: Entities
     uniqueID: 3610184133
