@@ -358,7 +358,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4.91, y: -6.92, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3652689714094808129}
@@ -405,7 +405,7 @@ SpriteRenderer:
   m_SortingLayerID: -684783163
   m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1120905215, guid: 3ef6326957371ab449a3345353875a7a, type: 3}
+  m_Sprite: {fileID: -86638783, guid: fdfe6bc8292bece46babb6bc2757f7ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -478,8 +478,10 @@ MonoBehaviour:
   currentPatience: 100
   hasUpgrade_CallStaff: 0
   checkoutCounter: {fileID: 0}
+  exitPoint: {fileID: 0}
   assignedTable: {fileID: 0}
   txtStatus: {fileID: 19686007962745904}
+  isPaid: 0
   wantedRecipe: {fileID: 0}
   orderBubble: {fileID: 8081813885055983826}
   imgOrderIcon: {fileID: 4970819830266806757}
@@ -551,7 +553,7 @@ Animator:
   m_GameObject: {fileID: 6691974567820988535}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 91c3e99ffa2ad6e47b741fa7ab231379, type: 2}
+  m_Controller: {fileID: 9100000, guid: 739e66be6aa848746ad454c620a15b8f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

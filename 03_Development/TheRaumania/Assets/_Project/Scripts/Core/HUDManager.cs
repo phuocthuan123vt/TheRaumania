@@ -21,16 +21,12 @@ public class HUDManager : MonoBehaviour
     void Update()
     {
         UpdateClock();
-        UpdateRating();
     }
-
-    void UpdateRating()
+    void OnRatingChangedHandler(float stars)
     {
-        if (txtRating != null && RestaurantRatingManager.Instance != null)
+        if (txtRating != null)
         {
-            float stars = RestaurantRatingManager.Instance.GetRestaurantStars();
-            // Định dạng hiển thị "4.5 Sao"
-            txtRating.text = $"★ {stars:F1}";
+            txtRating.text = string.Format("{0:F1}", stars);
         }
     }
 
@@ -58,11 +54,13 @@ public class HUDManager : MonoBehaviour
     private void OnEnable()
     {
         PlayerData.OnCreditChanged += UpdateMoney;
+        RestaurantRatingManager.OnRatingChanged += OnRatingChangedHandler;
     }
 
     private void OnDisable()
     {
         PlayerData.OnCreditChanged -= UpdateMoney;
+        RestaurantRatingManager.OnRatingChanged -= OnRatingChangedHandler;
     }
 
     void UpdateMoney(int currentCredit)
@@ -74,5 +72,10 @@ public class HUDManager : MonoBehaviour
     private void Start()
     {
         UpdateMoney(PlayerData.RCredit);
+        // Initialize rating display from manager if available
+        if (RestaurantRatingManager.Instance != null)
+        {
+            OnRatingChangedHandler(RestaurantRatingManager.Instance.GetRestaurantStars());
+        }
     }
 }

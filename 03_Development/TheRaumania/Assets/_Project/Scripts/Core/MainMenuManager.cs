@@ -60,6 +60,6 @@ public class MainMenuManager : MonoBehaviour
 
     private void LoadGameplayScene()
     {
-        SceneManager.LoadScene("scn_MainGame");
+        SceneManager.LoadScene("scn_Village");
     }
 }

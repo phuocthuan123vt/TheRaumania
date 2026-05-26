@@ -1,13 +1,39 @@
 using UnityEngine;
 using System.Linq;
+using System;
+using TMPro;
 
 public class RestaurantRatingManager : MonoBehaviour
 {
     public static RestaurantRatingManager Instance;
 
+    // Event fired when the restaurant star rating changes
+    public static event Action<float> OnRatingChanged;
+
+    [Header("UI (auto-mapped at runtime)")]
+    public TextMeshProUGUI txtRating;
+
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else if (Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        // Try to auto-map HUD text if available
+        if (txtRating == null && HUDManager.Instance != null)
+        {
+            txtRating = HUDManager.Instance.txtRating;
+        }
+
+        // Broadcast initial rating so HUD can initialize
+        BroadcastRating();
     }
 
     /// <summary>
@@ -37,6 +63,17 @@ public class RestaurantRatingManager : MonoBehaviour
         return Mathf.Clamp(rawStars, 1f, 5f);
     }
 
+    void BroadcastRating()
+    {
+        float stars = GetRestaurantStars();
+        OnRatingChanged?.Invoke(stars);
+
+        if (txtRating != null)
+        {
+            txtRating.text = string.Format("{0:F1}", stars);
+        }
+    }
+
     /// <summary>
     /// Lắng nghe khách hàng gọi review trước khi rời đi
     /// </summary>
@@ -55,6 +92,9 @@ public class RestaurantRatingManager : MonoBehaviour
         PlayerData.foodQualityScore = Mathf.Lerp(PlayerData.foodQualityScore, foodScore, 0.1f);
 
         Debug.Log($"<color=orange>Khách review: Hài lòng={satisfactionScore:F1}/10, Món={foodScore:F1}/10. => Nhà hàng đang đạt {GetRestaurantStars():F1} Sao.</color>");
+
+        // Notify listeners and update mapped UI
+        BroadcastRating();
     }
 
     /// <summary>
@@ -64,11 +104,13 @@ public class RestaurantRatingManager : MonoBehaviour
     {
         PlayerData.hygieneScore -= amount;
         PlayerData.hygieneScore = Mathf.Clamp(PlayerData.hygieneScore, 0f, 10f);
+        BroadcastRating();
     }
 
     public void IncreaseHygiene(float amount)
     {
         PlayerData.hygieneScore += amount;
         PlayerData.hygieneScore = Mathf.Clamp(PlayerData.hygieneScore, 0f, 10f);
+        BroadcastRating();
     }
 }

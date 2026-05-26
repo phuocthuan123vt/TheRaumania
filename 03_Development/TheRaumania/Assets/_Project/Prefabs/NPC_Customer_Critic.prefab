@@ -405,7 +405,7 @@ SpriteRenderer:
   m_SortingLayerID: -684783163
   m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1120905215, guid: 3ef6326957371ab449a3345353875a7a, type: 3}
+  m_Sprite: {fileID: -57884274, guid: c193689223d320c4aa843fdd8e753699, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -452,7 +452,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 2}
+    oldSize: {x: 0.16, y: 0.32}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -478,8 +478,10 @@ MonoBehaviour:
   currentPatience: 100
   hasUpgrade_CallStaff: 0
   checkoutCounter: {fileID: 0}
+  exitPoint: {fileID: 0}
   assignedTable: {fileID: 0}
   txtStatus: {fileID: 19686007962745904}
+  isPaid: 0
   wantedRecipe: {fileID: 0}
   orderBubble: {fileID: 8081813885055983826}
   imgOrderIcon: {fileID: 4970819830266806757}
@@ -551,7 +553,7 @@ Animator:
   m_GameObject: {fileID: 6691974567820988535}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 91c3e99ffa2ad6e47b741fa7ab231379, type: 2}
+  m_Controller: {fileID: 9100000, guid: 827daee1616bff248b4198a93c6228c8, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
