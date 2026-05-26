@@ -27,6 +27,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnInteractPressed(InputAction.CallbackContext context)
     {
+        // Nếu Cheat Console đang mở thì không cho tương tác
+        if (CheatConsole.Instance != null && CheatConsole.Instance.IsConsoleOpen) return;
+
         Collider2D[] closeObjects = Physics2D.OverlapCircleAll(transform.position, 2f);
         var interactables = new List<Interactable>();
         foreach (var col in closeObjects)
@@ -68,6 +71,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        // Kiểm tra xem người chơi có đang nhập lệnh không, nếu có thì chặn di chuyển
+        if (CheatConsole.Instance != null && CheatConsole.Instance.IsConsoleOpen)
+        {
+            _moveInput = Vector2.zero;
+            _anim.SetBool("IsMoving", false);
+            return;
+        }
+
         _moveInput = _inputActions.Player.Move.ReadValue<Vector2>();
         if (_moveInput != Vector2.zero)
         {

@@ -5,6 +5,10 @@ public class HUDManager : MonoBehaviour
     public static HUDManager Instance;
     [Header("Money UI")]
     public TextMeshProUGUI txtMoney;
+
+    [Header("Rating UI")]
+    public TextMeshProUGUI txtRating; // Kéo thả Text hiển thị sao vào đây
+
     [Header("Time UI")]
     public TextMeshProUGUI txtTime;
     public TextMeshProUGUI txtDay;
@@ -17,6 +21,17 @@ public class HUDManager : MonoBehaviour
     void Update()
     {
         UpdateClock();
+        UpdateRating();
+    }
+
+    void UpdateRating()
+    {
+        if (txtRating != null && RestaurantRatingManager.Instance != null)
+        {
+            float stars = RestaurantRatingManager.Instance.GetRestaurantStars();
+            // Định dạng hiển thị "4.5 Sao"
+            txtRating.text = $"★ {stars:F1}";
+        }
     }
 
     void UpdateClock()

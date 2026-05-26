@@ -9,7 +9,7 @@ public class ForcePalette
         GameObject paletteObj = new GameObject("pal_Fixed_System");
         paletteObj.AddComponent<Grid>();
 
-        string path = "Assets/_Project/Art/Tiles/pal_Fixed_System.prefab";
+        string path = "Assets/_Project/Art/GroundTiles/groundpal_Fixed_System.prefab";
 
         PrefabUtility.SaveAsPrefabAsset(paletteObj, path);
 

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class CustomerSpawner : MonoBehaviour
@@ -93,7 +93,6 @@ public class CustomerSpawner : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[CustomerSpawner] Bạn chưa gán Prefab cho khách hàng nào cả!");
         }
     }
 }
