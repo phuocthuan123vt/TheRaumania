@@ -16,9 +16,9 @@ public class RestaurantRatingManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            {
+                Instance = this;
+                DontDestroyOnLoad(this.transform.root.gameObject);
         }
         else if (Instance != this)
         {

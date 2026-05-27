@@ -17,14 +17,14 @@ public class CustomerAI : MonoBehaviour
 
     [Header("Behavior Tree Flags")]
     public bool hasUpgrade_CallStaff = false;
-    public Transform checkoutCounter;
-    public Transform exitPoint; // Điểm đi ra về (SpawnPoint)
+    // NOTE: checkout and exit transforms are discovered dynamically at runtime
 
     private float _checkoutWaitTime = 1.5f;     // Chờ 1.5s thanh toán tại bàn nếu ko có quầy thu ngân
 
     [Header("Tham chiếu Logic")]
     public Table assignedTable;
-    public TextMeshProUGUI txtStatus;
+    public Slider patienceSlider;
+    public Image patienceFillColor;
 
     private NavMeshAgent _agent;
     private Animator _anim;
@@ -49,6 +49,7 @@ public class CustomerAI : MonoBehaviour
     public Sprite emoteHappy;
     public Sprite emoteWave;
     public Sprite emotePay;
+    public Sprite emoteEat;
 
     public int _mySeatIndex;
 
@@ -78,21 +79,25 @@ public class CustomerAI : MonoBehaviour
     private void Start()
     {
         currentState = CustomerState.Queueing;
-        
-        // Tự động tìm Quầy thu ngân cực mạnh (bất chấp sai tên)
-        if (checkoutCounter == null)
-        {
-            CheckoutManager mgr = FindObjectOfType<CheckoutManager>();
-            if (mgr != null) checkoutCounter = mgr.transform;
-            else
-            {
-                GameObject counter = GameObject.Find("CheckoutPoint");
-                if (counter != null) checkoutCounter = counter.transform;
-            }
-        }
-
         // Logic trừ Patience giờ sẽ do BT quản lý (không còn dùng Coroutine)
         ConstructBehaviorTree();
+    }
+
+    // Try to locate a Checkout transform in the scene by manager or name
+    private Transform FindCheckoutTransform()
+    {
+        if (CheckoutManager.Instance != null) return CheckoutManager.Instance.transform;
+        GameObject go = GameObject.Find("CheckoutPoint");
+        if (go != null) return go.transform;
+        return null;
+    }
+
+    // Try to locate a spawn/exit point
+    private Transform FindSpawnPointTransform()
+    {
+        GameObject go = GameObject.Find("SpawnPoint");
+        if (go == null) go = GameObject.Find("ExitPoint");
+        return go != null ? go.transform : null;
     }
 
     private void ConstructBehaviorTree()
@@ -182,73 +187,39 @@ public class CustomerAI : MonoBehaviour
             return NodeState.Running; // Trạng thái này sẽ kết thúc bởi Coroutine EatRoutine
         });
 
-        // 2.5 Checkout Sequence
-        ActionNode moveToCounter = new ActionNode(() => 
+        // 2.5 Checkout Sequence (đợi người chơi bấm E tại bàn)
+        ActionNode waitForPayment = new ActionNode(() =>
         {
-            if (!_isDoneEating) return NodeState.Failure;
-
-            // Bảo hiểm: Tìm lại quầy thu ngân nếu mất kết nối
-            if (CheckoutManager.Instance == null) CheckoutManager.Instance = FindObjectOfType<CheckoutManager>();
+            if (!_isDoneEating) return NodeState.Running;
 
             if (currentState == CustomerState.Eating)
             {
                 currentState = CustomerState.CheckingOut;
                 ShowEmote(emotePay);
-                
-                _anim.SetBool("IsSitting", false);
 
-                // MẸO CHỮA KẸT NAVMESH BẰNG CODE: Tìm vùng xanh an toàn gần nhất
-                NavMeshHit hit;
-                if (NavMesh.SamplePosition(transform.position, out hit, 2.0f, NavMesh.AllAreas))
-                {
-                    transform.position = hit.position; // Trượt nhẹ NPC ra khỏi hố đen của ghế
-                }
-
-                _agent.enabled = true;
-                
-                // Giải quyết triệt để lỗi Trượt Y: Trọng lực phải bằng 0 trong game Top-Down!
+                // Giữ khách ngồi tại bàn chờ thanh toán
+                if (_agent.enabled) _agent.enabled = false;
                 Rigidbody2D rb = GetComponent<Rigidbody2D>();
                 if (rb != null)
                 {
-                    rb.simulated = true;
-                    rb.gravityScale = 0f; // Fix cứng ngắc: Không bao giờ rơi xuống hố nữa
+                    rb.simulated = false;
                     rb.velocity = Vector2.zero;
                 }
-
-                if (CheckoutManager.Instance != null)
+                if (_anim != null)
                 {
-                    CheckoutManager.Instance.JoinQueue(this);
+                    _anim.SetBool("IsSitting", true);
+                    _anim.SetBool("IsMoving", false);
+                    _anim.SetFloat("SitX", _targetSitX);
                 }
             }
-            
-            // XỬ LÝ ĐỨNG XẾP HÀNG THU NGÂN
-            if (CheckoutManager.Instance != null)
+
+            if (!isPaid)
             {
-                Vector3 targetPos = CheckoutManager.Instance.GetQueuePosition(this);
-                _agent.SetDestination(targetPos);
-                
-                // Đứng đây trừ kiên nhẫn dần dần cho đến khi isPaid = true (Player ấn E)
-                if (isPaid) return NodeState.Success;
-                
-                currentPatience -= (profile.patienceDecayRate * 0.5f) * Time.deltaTime; // Trừ chậm hơn một chút
+                currentPatience -= (profile.patienceDecayRate * 0.25f) * Time.deltaTime;
                 return NodeState.Running;
             }
 
-            // --- TRƯỜNG HỢP AUTO FALLBACK NẾU CHƯA LÀM CHECKOUT MANAGER ---
-            if (checkoutCounter != null)
-            {
-                _agent.SetDestination(checkoutCounter.position);
-                // Fix lỗi NavMesh nhận nhầm khoảng cách: dùng Distance thực tế thay vì _agent.remainingDistance
-                if (Vector2.Distance(transform.position, checkoutCounter.position) <= 1.0f) 
-                    return NodeState.Success;
-                
-                return NodeState.Running;
-            }
-            
-            _checkoutWaitTime -= Time.deltaTime;
-            if (_checkoutWaitTime <= 0) return NodeState.Success;
-
-            return NodeState.Running;
+            return NodeState.Failure; // Paid -> let next node handle pay+leave
         });
         ActionNode payAndTipAction = new ActionNode(() => 
         {
@@ -262,7 +233,8 @@ public class CustomerAI : MonoBehaviour
             OnLeave(); // <--- Đưa hàm gọi đi về cửa (Exit) vào ĐÚNG NƠI NÀY
             return NodeState.Success;
         });
-        Sequence checkoutSequence = new Sequence(new List<Node> { moveToCounter, payAndTipAction, happyAndLeaveAction });
+        Sequence payAndLeaveSequence = new Sequence(new List<Node> { payAndTipAction, happyAndLeaveAction });
+        Selector checkoutSequence = new Selector(new List<Node> { waitForPayment, payAndLeaveSequence });
 
         // Lắp các Selector lại vào Vòng Lặp Phục Vụ tiêu chuẩn
         Sequence standardServiceLoop = new Sequence(new List<Node>
@@ -296,6 +268,19 @@ public class CustomerAI : MonoBehaviour
     }
 
     #region AI Logic Flow
+
+    // Hàm này sẽ được gọi từ Interactable (nhấn E)
+    public void OnInteractCalled()
+    {
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.OnPlayerInteractWithCustomer(this);
+        }
+        else
+        {
+            Debug.LogError("Chưa có LevelManager trong scene!");
+        }
+    }
 
     public void LeadToSeat(Table table, int seatIndex)
     {
@@ -361,12 +346,13 @@ public class CustomerAI : MonoBehaviour
             orderBubble.SetActive(false);
             _dishStars = stars;
             currentState = CustomerState.Eating;
+            isPaid = false; // reset payment flag for this meal
             
             // 🔥 TRỌNG TÂM FIX BUG ĐÂY: Hồi phục kiên nhẫn khi có đồ ăn + Dừng trừ chờ!
-            currentPatience = 100f; 
-            
-            if (txtStatus != null)
-                Debug.Log($"Khách nhận món: {dish.itemName} ({stars:F1} sao)");
+            currentPatience = 100f;
+
+            if (emoteEat != null) ShowEmote(emoteEat);
+            Debug.Log($"Khách nhận món: {dish.itemName} ({stars:F1} sao)");
 
             StartCoroutine(EatRoutine());
         }
@@ -377,8 +363,12 @@ public class CustomerAI : MonoBehaviour
 
     IEnumerator EatRoutine()
     {
-        yield return new WaitForSeconds(5f); 
+        yield return new WaitForSeconds(Random.Range(10f, 15f));
         _isDoneEating = true; // Báo hiệu ActionNode "eatAction" là đã ăn xong !
+
+        // Sau khi ăn xong, chuyển sang đợi thanh toán tại bàn
+        currentState = CustomerState.CheckingOut;
+        ShowEmote(emotePay);
     }
 
     // --- Các hàm tương tác với Player / Môi trường ---
@@ -386,6 +376,147 @@ public class CustomerAI : MonoBehaviour
     public void ReceivePaymentByPlayer()
     {
         isPaid = true;
+        StartLeaveFromTable();
+    }
+
+    private void StartLeaveFromTable()
+    {
+        // Ensure we only trigger once
+        if (currentState == CustomerState.Leaving) return;
+
+        currentState = CustomerState.Leaving;
+        _isPatienceActive = false;
+
+        if (_anim != null)
+        {
+            _anim.SetBool("IsSitting", false);
+            _anim.SetBool("IsMoving", true);
+            _anim.CrossFade("Movement", 0.05f);
+        }
+
+        // Move onto NavMesh so agent can path out naturally
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position, out hit, 2.0f, NavMesh.AllAreas))
+        {
+            transform.position = hit.position;
+        }
+
+        _agent.enabled = true;
+        _agent.isStopped = false;
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.simulated = true;
+            rb.gravityScale = 0f;
+            rb.velocity = Vector2.zero;
+        }
+
+        Vector3 finalDest = new Vector3(0, -10, 0);
+        Transform spawnTrans = FindSpawnPointTransform();
+        if (spawnTrans != null)
+        {
+            finalDest = spawnTrans.position;
+        }
+        else
+        {
+            CustomerSpawner spawner = FindObjectOfType<CustomerSpawner>();
+            if (spawner != null)
+            {
+                finalDest = spawner.transform.position;
+            }
+            else
+            {
+                GameObject autoDoor = GameObject.Find("SpawnPoint");
+                if (autoDoor == null) autoDoor = GameObject.Find("ExitPoint");
+                if (autoDoor != null) finalDest = autoDoor.transform.position;
+            }
+        }
+
+        // Ensure agent is on NavMesh, then ensure destination is on NavMesh
+        if (!_agent.isOnNavMesh)
+        {
+            NavMeshHit agentHit;
+            if (NavMesh.SamplePosition(transform.position, out agentHit, 3.0f, NavMesh.AllAreas))
+            {
+                _agent.Warp(agentHit.position);
+            }
+        }
+
+        // Ensure destination is on NavMesh
+        NavMeshHit destHit;
+        if (NavMesh.SamplePosition(finalDest, out destHit, 3.0f, NavMesh.AllAreas))
+        {
+            finalDest = destHit.position;
+        }
+
+        _agent.SetDestination(finalDest);
+        Debug.Log($"CustomerAI: leaving to SpawnPoint at {finalDest} | onNavMesh={_agent.isOnNavMesh} | pathStatus={_agent.pathStatus}");
+
+        if (_agent.pathStatus == NavMeshPathStatus.PathInvalid)
+        {
+            StartCoroutine(ForceMoveToSpawn(finalDest));
+        }
+        else
+        {
+            StartCoroutine(MonitorLeaveProgress(finalDest));
+        }
+        Destroy(gameObject, 8f);
+    }
+
+    private IEnumerator MonitorLeaveProgress(Vector3 dest)
+    {
+        float checkInterval = 0.25f;
+        float stuckTime = 0f;
+        Vector3 lastPos = transform.position;
+
+        while (currentState == CustomerState.Leaving)
+        {
+            yield return new WaitForSeconds(checkInterval);
+
+            float moved = Vector3.Distance(transform.position, lastPos);
+            if (moved < 0.01f)
+            {
+                stuckTime += checkInterval;
+            }
+            else
+            {
+                stuckTime = 0f;
+            }
+
+            lastPos = transform.position;
+
+            if (stuckTime >= 0.75f)
+            {
+                StartCoroutine(ForceMoveToSpawn(dest));
+                yield break;
+            }
+        }
+    }
+
+    private IEnumerator ForceMoveToSpawn(Vector3 dest)
+    {
+        // Fallback movement when NavMesh path is invalid
+        if (_agent != null && _agent.enabled) _agent.enabled = false;
+
+        float timeout = 6f;
+        while (timeout > 0f)
+        {
+            Vector3 dir = (dest - transform.position);
+            if (dir.sqrMagnitude > 0.0001f)
+            {
+                dir.Normalize();
+                if (_anim != null)
+                {
+                    _anim.SetBool("IsMoving", true);
+                    _anim.SetFloat("MoveX", dir.x);
+                    _anim.SetFloat("MoveY", dir.y);
+                }
+            }
+
+            transform.position = Vector3.MoveTowards(transform.position, dest, 1.5f * Time.deltaTime);
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
     }
 
     void ProcessPayment()
@@ -457,7 +588,11 @@ public class CustomerAI : MonoBehaviour
 
         if (assignedTable != null) assignedTable.seats[_mySeatIndex].isOccupied = false;
 
-        _anim.SetBool("IsSitting", false);
+        if (_anim != null)
+        {
+            _anim.SetBool("IsSitting", false);
+            _anim.SetBool("IsMoving", true);
+        }
 
         // Chữa kẹt NavMesh lúc tức giận bỏ ngang
         NavMeshHit hit;
@@ -470,14 +605,15 @@ public class CustomerAI : MonoBehaviour
         
         // --- XỬ LÝ LỐI RA (THÔNG MINH HƠN) ---
         Vector3 finalDest = new Vector3(0, -10, 0); // Failsafe
-        
-        if (exitPoint != null) 
+
+        Transform spawnTrans = FindSpawnPointTransform();
+        if (spawnTrans != null)
         {
-            finalDest = exitPoint.position;
+            finalDest = spawnTrans.position;
         }
-        else 
+        else
         {
-            // Bắt sóng trực tiếp Spawner dể lấy điểm đi về (đỡ lo gõ sai tên)
+            // Bắt sóng trực tiếp Spawner để lấy điểm đi về (đỡ lo gõ sai tên)
             CustomerSpawner spawner = FindObjectOfType<CustomerSpawner>();
             if (spawner != null)
             {
@@ -508,10 +644,15 @@ public class CustomerAI : MonoBehaviour
     #region Visuals
     void UpdateVisuals()
     {
-        if (txtStatus != null)
+        if (patienceSlider != null)
         {
-            txtStatus.text = $"{currentState}\nPat: {Mathf.Round(currentPatience)}%";
-            txtStatus.color = Color.Lerp(Color.red, Color.green, currentPatience / 100f);
+            patienceSlider.value = currentPatience / 100f;
+        }
+
+        if (patienceFillColor != null)
+        {
+            // Trạng thái Color.Lerp: currentPatience/100f = 1 (100) thì màu xanh, = 0 thì màu đỏ
+            patienceFillColor.color = Color.Lerp(Color.red, Color.green, currentPatience / 100f);
         }
 
         if (_anim == null || !_agent.enabled) return;

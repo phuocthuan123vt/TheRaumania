@@ -12,7 +12,17 @@ public class CookingManager : MonoBehaviour
     private float _avgFreshness;
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            // Ensure we call DontDestroyOnLoad on the root GameObject to avoid editor warning
+            DontDestroyOnLoad(this.transform.root.gameObject);
+        }
+        else if (Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
     }
     public void OpenRecipeBook()
     {

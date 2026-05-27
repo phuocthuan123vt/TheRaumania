@@ -149,7 +149,7 @@ MonoBehaviour:
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1704712720957491476, guid: edd5bd5e93e59db45bfb43b76cec6128, type: 3}
+      - m_Target: {fileID: 1704712720957491476, guid: 75858f8038eef9446bab27b3d99c4122, type: 3}
         m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
         m_MethodName: ToggleShop
         m_Mode: 1

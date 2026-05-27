@@ -12,6 +12,10 @@ public class CheckoutManager : MonoBehaviour
     
     public List<CustomerAI> queue = new List<CustomerAI>();
 
+    [Header("Thanh toán")]
+    [Tooltip("Khoảng cách tối đa (đơn vị Unity) để chấp nhận thanh toán từ khách ở đầu hàng.")]
+    public float acceptPaymentRange = 1.0f;
+
     private void Awake()
     {
         Instance = this;
@@ -30,6 +34,16 @@ public class CheckoutManager : MonoBehaviour
         if (!queue.Contains(customer))
         {
             queue.Add(customer);
+            // Immediately set the customer's NavMesh target to the calculated queue position
+            if (customer != null)
+            {
+                var agent = customer.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                if (agent != null)
+                {
+                    agent.enabled = true;
+                    agent.SetDestination(GetQueuePosition(customer));
+                }
+            }
         }
     }
 
@@ -52,19 +66,49 @@ public class CheckoutManager : MonoBehaviour
 
     public void ProcessNextCustomer()
     {
-        if (queue.Count > 0)
+        if (queue.Count == 0)
         {
-            CustomerAI firstCustomer = queue[0];
-            queue.RemoveAt(0); // Nhấc khách đầu tiên ra khỏi hàng đợi
-            
-            // Kích hoạt flag báo hiệu đã thu tiền
-            firstCustomer.ReceivePaymentByPlayer();
-            
+            Debug.Log("<color=yellow>Chưa có ai đứng đợi ở quầy cả!</color>");
+            return;
+        }
+
+        // Find the first customer in queue who is within acceptPaymentRange of the checkout point
+        CustomerAI customerToPay = null;
+        int indexToRemove = -1;
+        for (int i = 0; i < queue.Count; i++)
+        {
+            var c = queue[i];
+            if (c == null) continue;
+            float dist = Vector2.Distance(new Vector2(c.transform.position.x, c.transform.position.y), new Vector2(transform.position.x, transform.position.y));
+            if (dist <= acceptPaymentRange)
+            {
+                customerToPay = c;
+                indexToRemove = i;
+                break;
+            }
+        }
+
+        if (customerToPay != null)
+        {
+            // Remove that specific customer from the queue
+            queue.RemoveAt(indexToRemove);
+            customerToPay.ReceivePaymentByPlayer();
             Debug.Log("<color=green>Đã thu tiền một khách! Các khách sau tiến lên trên.</color>");
+            // After removing, update destinations for remaining customers so they step forward
+            for (int i = 0; i < queue.Count; i++)
+            {
+                var c = queue[i];
+                if (c == null) continue;
+                var agent = c.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                if (agent != null)
+                {
+                    agent.SetDestination(GetQueuePosition(c));
+                }
+            }
         }
         else
         {
-            Debug.Log("<color=yellow>Chưa có ai đứng đợi ở quầy cả!</color>");
+            Debug.Log("<color=yellow>Không có khách nào đến quầy để nhận thanh toán (chưa đến chỗ).</color>");
         }
     }
 }

@@ -9,14 +9,45 @@ public class ScenePortal : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (!collision.CompareTag("Player")) return;
+
+        // Ghi nhớ tên điểm SpawnPoint trước khi load map
+        PersistentGameManager.TargetSpawnPointName = spawnPointName;
+
+        // Nếu scene đã được load trước đó, chỉ set active và di chuyển Player
+        var existing = SceneManager.GetSceneByName(targetSceneName);
+        if (existing.IsValid() && existing.isLoaded)
         {
-            // Ghi nhớ tên điểm SpawnPoint trước khi load map
-            PersistentGameManager.TargetSpawnPointName = spawnPointName;
-            
-            // Nếu bạn có dùng hiệu ứng mờ dần (Fade), bạn có thể gọi ở đây
-            // Còn đây là load trực tiếp
-            SceneManager.LoadScene(targetSceneName);
+            // Set scene active so lighting/cameras in that scene become active
+            SceneManager.SetActiveScene(existing);
+            // Yêu cầu PersistentGameManager di chuyển Player tới spawn trong scene đó
+            if (PersistentGameManager.Instance != null)
+            {
+                PersistentGameManager.Instance.MovePlayerToSpawnPoint(spawnPointName);
+                PersistentGameManager.Instance.ActivateSceneForPlayer(existing);
+            }
+            return;
+        }
+
+        // Nếu chưa load, load additive để giữ scene hiện tại chạy song song
+        StartCoroutine(LoadTargetSceneAdditive());
+    }
+
+    private System.Collections.IEnumerator LoadTargetSceneAdditive()
+    {
+        var op = SceneManager.LoadSceneAsync(targetSceneName, LoadSceneMode.Additive);
+        while (!op.isDone) yield return null;
+
+        // Set newly loaded scene active
+        var loaded = SceneManager.GetSceneByName(targetSceneName);
+        if (loaded.IsValid())
+        {
+            SceneManager.SetActiveScene(loaded);
+            if (PersistentGameManager.Instance != null)
+            {
+                // Move player (OnSceneLoaded already handles MovePlayerToSpawnPoint if TargetSpawnPointName set)
+                PersistentGameManager.Instance.ActivateSceneForPlayer(loaded);
+            }
         }
     }
 }
