@@ -145,10 +145,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactMessage: "Nh\u1EA5n E \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c"
+  interactRange: 2
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6775689528547953109, guid: 75858f8038eef9446bab27b3d99c4122, type: 3}
         m_TargetAssemblyTypeName: WarehouseUI, Assembly-CSharp
         m_MethodName: OpenDryStorage
         m_Mode: 1

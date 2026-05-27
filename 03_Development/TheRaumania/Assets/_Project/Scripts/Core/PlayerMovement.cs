@@ -6,7 +6,8 @@ public class PlayerMovement : MonoBehaviour
 {
     #region Biến cấu hình
     [Header("Cài đặt di chuyển")]
-    [SerializeField] private float _moveSpeed = 5f;
+    [SerializeField][Min(0.1f)] private float _moveSpeed = 5f;
+    [SerializeField][Min(0.1f)] private float _defaultMoveSpeed = 5f;
     private Rigidbody2D _rb;
     private Vector2 _moveInput;
     private Vector2 _lastMoveDir = Vector2.down;
@@ -20,6 +21,13 @@ public class PlayerMovement : MonoBehaviour
         _inputActions = new PlayerInputActions();
         _inputActions.Player.Interact.performed += OnInteractPressed;
         _anim = GetComponentInChildren<Animator>();
+
+        // Defensive: prevent move speed from being zeroed by overrides/runtime
+        if (_moveSpeed <= 0f)
+        {
+            _moveSpeed = _defaultMoveSpeed > 0f ? _defaultMoveSpeed : 5f;
+            Debug.LogWarning("PlayerMovement: move speed was 0, restored default.");
+        }
     }
 
     private void OnEnable() => _inputActions.Player.Enable();
@@ -27,6 +35,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnInteractPressed(InputAction.CallbackContext context)
     {
+        // Nếu Cheat Console đang mở thì không cho tương tác
+        if (CheatConsole.Instance != null && CheatConsole.Instance.IsConsoleOpen) return;
+
         Collider2D[] closeObjects = Physics2D.OverlapCircleAll(transform.position, 2f);
         var interactables = new List<Interactable>();
         foreach (var col in closeObjects)
@@ -68,6 +79,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        // Kiểm tra xem người chơi có đang nhập lệnh không, nếu có thì chặn di chuyển
+        if (CheatConsole.Instance != null && CheatConsole.Instance.IsConsoleOpen)
+        {
+            _moveInput = Vector2.zero;
+            _anim.SetBool("IsMoving", false);
+            return;
+        }
+
         _moveInput = _inputActions.Player.Move.ReadValue<Vector2>();
         if (_moveInput != Vector2.zero)
         {

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3f778c3c03856247a1a8d06549e23ef, type: 3}
+  m_Name: so_Item_CanhGaSotOtChuong
+  m_EditorClassIdentifier: 
+  id: canhgasototchuong
+  itemName: "C\xE1nh g\xE0 s\u1ED1t \u1EDBt chu\xF4ng"
+  icon: {fileID: 21300000, guid: 2db5946e8b8efd844a46161825016ce2, type: 3}
+  basePrice: 100
+  isPerishable: 0
+  decayRate: 0
+  preferredStorage: 0
+  itemType: Dish

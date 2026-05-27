@@ -5,6 +5,10 @@ public class HUDManager : MonoBehaviour
     public static HUDManager Instance;
     [Header("Money UI")]
     public TextMeshProUGUI txtMoney;
+
+    [Header("Rating UI")]
+    public TextMeshProUGUI txtRating; // Kéo thả Text hiển thị sao vào đây
+
     [Header("Time UI")]
     public TextMeshProUGUI txtTime;
     public TextMeshProUGUI txtDay;
@@ -13,11 +17,19 @@ public class HUDManager : MonoBehaviour
     private float _minute, _hour;
     private int _day = 1;
     private void Awake() { Instance = this; }
+
     void Update()
     {
         UpdateClock();
-        UpdateMoney();
     }
+    void OnRatingChangedHandler(float stars)
+    {
+        if (txtRating != null)
+        {
+            txtRating.text = string.Format("{0:F1}", stars);
+        }
+    }
+
     void UpdateClock()
     {
         _minute += Time.deltaTime * timeSpeed;
@@ -38,8 +50,32 @@ public class HUDManager : MonoBehaviour
         txtTime.text = string.Format("{0:00}:{1:00} {2}", displayHour, _minute, ampm);
         txtDay.text = "Ngày " + _day;
     }
-    void UpdateMoney()
+
+    private void OnEnable()
     {
-        txtMoney.text = PlayerData.rCredit.ToString("N0") + " RC";
+        PlayerData.OnCreditChanged += UpdateMoney;
+        RestaurantRatingManager.OnRatingChanged += OnRatingChangedHandler;
+    }
+
+    private void OnDisable()
+    {
+        PlayerData.OnCreditChanged -= UpdateMoney;
+        RestaurantRatingManager.OnRatingChanged -= OnRatingChangedHandler;
+    }
+
+    void UpdateMoney(int currentCredit)
+    {
+        txtMoney.text = currentCredit.ToString("N0") + " RC";
+    }
+
+    // Call once at start to initialize UI
+    private void Start()
+    {
+        UpdateMoney(PlayerData.RCredit);
+        // Initialize rating display from manager if available
+        if (RestaurantRatingManager.Instance != null)
+        {
+            OnRatingChangedHandler(RestaurantRatingManager.Instance.GetRestaurantStars());
+        }
     }
 }

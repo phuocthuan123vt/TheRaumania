@@ -75,7 +75,7 @@ public class ShopUI : MonoBehaviour
             totalQty += item.quantity; 
         }
 
-        txtWallet.text = "Ví: " + PlayerData.rCredit + " RC";
+        txtWallet.text = "Ví: " + PlayerData.RCredit + " RC";
         txtTotalBill.text = "Thành tiền: " + totalMoney + " RC";
 
         if (txtTotalQty != null)

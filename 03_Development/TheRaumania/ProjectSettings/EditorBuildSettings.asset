@@ -6,6 +6,27 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Project/Scenes/scn_MainGame.unity
+    path: Assets/_Project/Scenes/scn_MainMenu.unity
+    guid: 8f12969e92979bc40912249026740195
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_Village.unity
+    guid: 7f6dcddc9afd3ff4893dc47f64a38694
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_Restaurant_lv1.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_Restaurant_lv2.unity
+    guid: 6702a5259c6e4f844ada68a631bf9766
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_Restaurant_lv3.unity
+    guid: 2eb14c00c44d2374f875bc32b37ff356
+  - enabled: 0
+    path: Assets/_Project/Scenes/scn_UpgradeStore1.unity
+    guid: 9c7840702de208a4e9889aaed738b0ba
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_Store.unity
+    guid: dc88e52a93b9f3c4fbb4a9fd57b55ede
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_UpgradeStore.unity
+    guid: fc40614c46ac20f4db24000dac744dcf
   m_configObjects: {}

@@ -52,6 +52,10 @@ public class LevelManager : MonoBehaviour
                     Debug.Log("Tay trắng không có món gì để đưa!");
                 }
                 break;
+            case CustomerAI.CustomerState.CheckingOut:
+                customer.ReceivePaymentByPlayer();
+                Debug.Log("Alex đã nhận thanh toán của khách!");
+                break;
         }
     }
     private void HandleLeadToTable(CustomerAI customer)
