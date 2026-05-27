@@ -16,6 +16,7 @@ MonoBehaviour:
   dishName: "Th\u1ECBt x\xE0o rau mu\u1ED1ng"
   dishIcon: {fileID: 21300000, guid: a4cf038fd370a864191dd8d3ac2ee1d5, type: 3}
   ingredientsRequired:
-  - {fileID: 11400000, guid: afcf3c5aa66ac384797f8aadcca39ced, type: 2}
+  - {fileID: 11400000, guid: 42969bffa19abd04d88cc1ba6df0ae65, type: 2}
   - {fileID: 11400000, guid: 5a61a84f4ca07dc418727a8b41ff2c8a, type: 2}
+  - {fileID: 11400000, guid: 5a159e3dc49bade4590e93abcf4ce6f7, type: 2}
   baseValue: 0

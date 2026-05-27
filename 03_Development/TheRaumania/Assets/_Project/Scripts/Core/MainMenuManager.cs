@@ -11,14 +11,29 @@ public class MainMenuManager : MonoBehaviour
     [Header("Slots")]
     public TextMeshProUGUI[] slotTexts; // 10 Text của 10 nút Slot
 
+    [Header("Intro Video")]
+    public IntroVideoController introController;
+
+    [Header("Audio")]
+    public AudioSource mainMenuBgm;
+
     // Nút New Game
     public void Btn_NewGame()
     {
         // Khởi tạo data mới cứng
         GameSaveData newData = new GameSaveData("AutoSave_NewGame", 1000);
         SaveSystem.Save(0, newData); // Lưu tạm vào slot 0 để qua scene kia đọc lại
-        
-        LoadGameplayScene();
+
+        if (mainMenuBgm != null) mainMenuBgm.Stop();
+
+        if (introController != null)
+        {
+            introController.PlayIntro(LoadGameplayScene);
+        }
+        else
+        {
+            LoadGameplayScene();
+        }
     }
 
     // Mở bảng Load Game
@@ -38,6 +53,7 @@ public class MainMenuManager : MonoBehaviour
         {
             // Bấm nhầm Slot không trống -> Load tạm vào slot 0 để sang scene kia nhận
             SaveSystem.Save(0, data); 
+            if (mainMenuBgm != null) mainMenuBgm.Stop();
             LoadGameplayScene();
         }
         else

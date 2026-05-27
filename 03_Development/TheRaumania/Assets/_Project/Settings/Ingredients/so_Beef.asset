@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: beef
   itemName: "Th\u1ECBt b\xF2"
-  icon: {fileID: 21300000, guid: a8d99941b2eeda94e85b70c8c660438c, type: 3}
-  basePrice: 35
+  icon: {fileID: 21300000, guid: 6f6bf0253d470ba4683faa283413e0b5, type: 3}
+  basePrice: 25
   isPerishable: 1
   decayRate: 20
   preferredStorage: 1

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3f778c3c03856247a1a8d06549e23ef, type: 3}
+  m_Name: so_Item_ComChienHaiSan
+  m_EditorClassIdentifier: 
+  id: comchienhaisan
+  itemName: "C\u01A1m chi\xEAn h\u1EA3i s\u1EA3n"
+  icon: {fileID: 21300000, guid: c89232a138e57f14fa3d6342559f0578, type: 3}
+  basePrice: 130
+  isPerishable: 0
+  decayRate: 0
+  preferredStorage: 0
+  itemType: Dish

@@ -554,7 +554,7 @@ MonoBehaviour:
   emoteHappy: {fileID: 21300000, guid: 10d5368ed7d7fd143b7183f2bfbdc186, type: 3}
   emoteWave: {fileID: 21300000, guid: 50b4ad34fc543674ebd4a01d75ef5039, type: 3}
   emotePay: {fileID: 21300000, guid: fc60a5ba1f7e6bc49825c84a89fab5a3, type: 3}
-  emoteEat: {fileID: 21300000, guid: 50b4ad34fc543674ebd4a01d75ef5039, type: 3}
+  emoteEat: {fileID: 21300000, guid: dacb7a6220bf3b34b961b1052d6788ba, type: 3}
   _mySeatIndex: 0
   isSpecialRequestMet: 0
   dirtPrefab: {fileID: 4202780416981792275, guid: 7b2f7cb40aba4354fb2e3b24e168b2ee, type: 3}
