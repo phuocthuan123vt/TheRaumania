@@ -21,18 +21,20 @@ public class MainMenuManager : MonoBehaviour
     public void Btn_NewGame()
     {
         // Khởi tạo data mới cứng
-        GameSaveData newData = new GameSaveData("AutoSave_NewGame", 1000);
+        GameSaveData newData = new GameSaveData("AutoSave_NewGame", 100000);
+        newData.sceneName = "";
+        newData.hasPlayerPosition = false;
         SaveSystem.Save(0, newData); // Lưu tạm vào slot 0 để qua scene kia đọc lại
 
         if (mainMenuBgm != null) mainMenuBgm.Stop();
 
         if (introController != null)
         {
-            introController.PlayIntro(LoadGameplayScene);
+            introController.PlayIntro(() => LoadGameplayScene("scn_Village"));
         }
         else
         {
-            LoadGameplayScene();
+            LoadGameplayScene("scn_Village");
         }
     }
 
@@ -54,7 +56,7 @@ public class MainMenuManager : MonoBehaviour
             // Bấm nhầm Slot không trống -> Load tạm vào slot 0 để sang scene kia nhận
             SaveSystem.Save(0, data); 
             if (mainMenuBgm != null) mainMenuBgm.Stop();
-            LoadGameplayScene();
+            LoadGameplayScene(null);
         }
         else
         {
@@ -74,8 +76,16 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    private void LoadGameplayScene()
+    private void LoadGameplayScene(string overrideScene)
     {
-        SceneManager.LoadScene("scn_Village");
+        if (!string.IsNullOrEmpty(overrideScene))
+        {
+            SceneManager.LoadScene(overrideScene);
+            return;
+        }
+
+        GameSaveData data = SaveSystem.Load(0);
+        string sceneName = (data != null && !string.IsNullOrEmpty(data.sceneName)) ? data.sceneName : "scn_Village";
+        SceneManager.LoadScene(sceneName);
     }
 }

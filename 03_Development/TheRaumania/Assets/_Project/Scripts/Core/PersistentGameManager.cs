@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using TMPro;
+using UnityEngine.UI;
 
 public class PersistentGameManager : MonoBehaviour
 {
@@ -43,6 +45,8 @@ public class PersistentGameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // Ensure gameplay isn't stuck in pause after scene transitions
+        Time.timeScale = 1f;
         // Khi Scene được load lên (scn_Restaurant, scn_Store)
         // Nếu có TargetSpawnPointName, cố di chuyển Player tới điểm đó
         if (!string.IsNullOrEmpty(TargetSpawnPointName))
@@ -233,6 +237,31 @@ public class PersistentGameManager : MonoBehaviour
                 Debug.Log("PersistentGameManager: Mapped pnl_FryingMinigame into CookingUIManager.");
             }
         }
+
+        // Map upgrade dialog panel into UpgradeManager if present
+        var upgradeMgr = GetComponentInChildren<UpgradeManager>(true);
+        if (upgradeMgr != null && upgradeMgr.pnlUpgradeDialog == null)
+        {
+            var pnl = FindPanel("pnl_UpgradeDialog");
+            if (pnl != null)
+            {
+                upgradeMgr.pnlUpgradeDialog = pnl;
+                // Try to find common UI fields
+                var txt = pnl.GetComponentInChildren<TMPro.TextMeshProUGUI>(true);
+                if (txt != null) upgradeMgr.txtUpgradeMessage = txt;
+                var input = pnl.GetComponentInChildren<TMPro.TMP_InputField>(true);
+                if (input != null) upgradeMgr.inputOfferAmount = input;
+                var buttons = pnl.GetComponentsInChildren<UnityEngine.UI.Button>(true);
+                if (buttons != null && buttons.Length > 0)
+                {
+                    // Heuristic: first button = Agree, second = Bargain, third = Cancel
+                    if (buttons.Length > 0) upgradeMgr.btnAgree = buttons[0];
+                    if (buttons.Length > 1) upgradeMgr.btnBargain = buttons[1];
+                    if (buttons.Length > 2) upgradeMgr.btnCancel = buttons[2];
+                }
+                Debug.Log("PersistentGameManager: Mapped pnl_UpgradeDialog into UpgradeManager.");
+            }
+        }
     }
 
     private void WireSceneInteractables(Scene scene)
@@ -322,6 +351,7 @@ public class PersistentGameManager : MonoBehaviour
     public void ActivateSceneForPlayer(Scene scene)
     {
         if (!scene.IsValid()) return;
+        Time.timeScale = 1f;
         UpdateManagersForActiveScene(scene);
         UpdateActiveSceneVisuals(scene);
         MapSceneUIToManagers(scene);

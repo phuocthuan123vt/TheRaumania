@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public static class PlayerData
 {
-    private static int _rCredit = 1000; // Tiền của người chơi
+    private static int _rCredit = 1000000; // Tiền của người chơi
 
     // --- DỮ LIỆU ĐÁNH GIÁ (RATING) ---
     public static float foodQualityScore = 5f;

@@ -14,8 +14,16 @@ public class ScenePortal : MonoBehaviour
         // Ghi nhớ tên điểm SpawnPoint trước khi load map
         PersistentGameManager.TargetSpawnPointName = spawnPointName;
 
+        // Resolve dynamic restaurant target: if this portal points to generic "scn_Restaurant"
+        string resolvedTarget = targetSceneName;
+        if (UpgradeManager.Instance != null && targetSceneName == "scn_Restaurant")
+        {
+            int lvl = Mathf.Clamp(UpgradeManager.Instance.highestUnlockedLevel, 1, 3);
+            resolvedTarget = $"scn_Restaurant_lv{lvl}";
+        }
+
         // Nếu scene đã được load trước đó, chỉ set active và di chuyển Player
-        var existing = SceneManager.GetSceneByName(targetSceneName);
+        var existing = SceneManager.GetSceneByName(resolvedTarget);
         if (existing.IsValid() && existing.isLoaded)
         {
             // Set scene active so lighting/cameras in that scene become active
@@ -30,16 +38,16 @@ public class ScenePortal : MonoBehaviour
         }
 
         // Nếu chưa load, load additive để giữ scene hiện tại chạy song song
-        StartCoroutine(LoadTargetSceneAdditive());
+        StartCoroutine(LoadTargetSceneAdditive(resolvedTarget));
     }
 
-    private System.Collections.IEnumerator LoadTargetSceneAdditive()
+    private System.Collections.IEnumerator LoadTargetSceneAdditive(string resolvedTarget)
     {
-        var op = SceneManager.LoadSceneAsync(targetSceneName, LoadSceneMode.Additive);
+        var op = SceneManager.LoadSceneAsync(resolvedTarget, LoadSceneMode.Additive);
         while (!op.isDone) yield return null;
 
         // Set newly loaded scene active
-        var loaded = SceneManager.GetSceneByName(targetSceneName);
+        var loaded = SceneManager.GetSceneByName(resolvedTarget);
         if (loaded.IsValid())
         {
             SceneManager.SetActiveScene(loaded);
