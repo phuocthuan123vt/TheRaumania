@@ -20,8 +20,8 @@ public class StoredItem
     {
         if (!itemData.isPerishable) return;
 
-        // Công thức: giảm theo decayRate của Item
-        currentFreshness -= itemData.decayRate * multiplier * Time.deltaTime;
+        // decayRate được hiểu là mức giảm theo mỗi giờ game
+        currentFreshness -= itemData.decayRate * multiplier;
         currentFreshness = Mathf.Clamp(currentFreshness, 0, 100);
     }
 }

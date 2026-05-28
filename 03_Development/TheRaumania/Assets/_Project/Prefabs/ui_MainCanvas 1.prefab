@@ -2087,7 +2087,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 6
   m_Viewport: {fileID: 8659449581641198609}
   m_HorizontalScrollbar: {fileID: 6214480905756393630}
   m_VerticalScrollbar: {fileID: 2980727737050342618}
@@ -10029,7 +10029,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 3
+  m_ScrollSensitivity: 6
   m_Viewport: {fileID: 1200322617578304690}
   m_HorizontalScrollbar: {fileID: 1960207331179242037}
   m_VerticalScrollbar: {fileID: 3231866418447918538}
@@ -14617,6 +14617,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6083bf889857f424db71c1f2e8a553e1, type: 2}
   - {fileID: 11400000, guid: 66daa7a68eca5884087a1efb1a484f66, type: 2}
   - {fileID: 11400000, guid: a52bf0a4bba22214ca22bdd49b1852ad, type: 2}
+  pnl_RecipeDetail: {fileID: 0}
+  txtRecipeDetail: {fileID: 0}
 --- !u!1 &9017082631012558758
 GameObject:
   m_ObjectHideFlags: 0

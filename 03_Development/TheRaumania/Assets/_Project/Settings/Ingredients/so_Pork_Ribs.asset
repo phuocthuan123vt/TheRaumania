@@ -17,6 +17,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 0d427f44d1e0bcf408fbc789edcaba37, type: 3}
   basePrice: 17
   isPerishable: 1
-  decayRate: 20
+  decayRate: 15
   preferredStorage: 1
   itemType: 

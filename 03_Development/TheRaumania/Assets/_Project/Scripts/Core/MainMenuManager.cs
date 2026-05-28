@@ -59,13 +59,17 @@ public class MainMenuManager : MonoBehaviour
     public void Btn_NewGame()
     {
         // Khởi tạo data mới cứng
-        GameSaveData newData = new GameSaveData("AutoSave_NewGame", 100000);
+        GameSaveData newData = new GameSaveData("AutoSave_NewGame", 500);
         newData.sceneName = "scn_Village";
         newData.hasPlayerPosition = false;
         newData.dayCount = 1;
         newData.hourOfDay = 5;
         newData.minuteOfHour = 0;
         newData.hasTimeState = true;
+        newData.foodQualityScore = 0f;
+        newData.hygieneScore = 0f;
+        newData.decorationScore = 0f;
+        newData.satisfactionHistory.Clear();
         SaveSystem.Save(0, newData); // Lưu tạm vào slot 0 để qua scene kia đọc lại
 
         if (mainMenuBgm != null) mainMenuBgm.Stop();
