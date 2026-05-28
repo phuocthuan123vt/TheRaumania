@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 2
   typeName: "Nh\xE0 Ph\xEA B\xECnh"
-  patienceDecayRate: 0.9
-  tipMultiplier: 2
+  patienceDecayRate: 0.75
+  tipMultiplier: 1.5
   avatar: {fileID: 0}

@@ -32,7 +32,22 @@ public class RestaurantRatingManager : MonoBehaviour
             txtRating = HUDManager.Instance.txtRating;
         }
 
+        if (txtRating == null)
+        {
+            txtRating = RuntimeReferenceFinder.FindDeepComponent<TextMeshProUGUI>(transform.root, "txt_Rating");
+        }
+
         // Broadcast initial rating so HUD can initialize
+        BroadcastRating();
+    }
+
+    private void Start()
+    {
+        if (txtRating == null)
+        {
+            txtRating = RuntimeReferenceFinder.FindDeepComponent<TextMeshProUGUI>(transform.root, "txt_Rating");
+        }
+
         BroadcastRating();
     }
 

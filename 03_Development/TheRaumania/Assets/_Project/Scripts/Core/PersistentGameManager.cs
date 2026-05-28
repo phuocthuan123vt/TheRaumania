@@ -210,7 +210,7 @@ public class PersistentGameManager : MonoBehaviour
 
         if (cookingUI.pnl_PrepMinigame == null)
         {
-            var pnl = FindPanel("pnl_PrepMinigame");
+            var pnl = FindPanel("pnl_PrepMinigame") ?? FindPanel("pnl_Minigame_Prep");
             if (pnl != null)
             {
                 cookingUI.pnl_PrepMinigame = pnl;
@@ -220,7 +220,7 @@ public class PersistentGameManager : MonoBehaviour
 
         if (cookingUI.pnl_SlicingMinigame == null)
         {
-            var pnl = FindPanel("pnl_SlicingMinigame");
+            var pnl = FindPanel("pnl_SlicingMinigame") ?? FindPanel("pnl_Minigame_Slicing");
             if (pnl != null)
             {
                 cookingUI.pnl_SlicingMinigame = pnl;
@@ -230,7 +230,7 @@ public class PersistentGameManager : MonoBehaviour
 
         if (cookingUI.pnl_FryingMinigame == null)
         {
-            var pnl = FindPanel("pnl_FryingMinigame");
+            var pnl = FindPanel("pnl_FryingMinigame") ?? FindPanel("pnl_Minigame_Frying");
             if (pnl != null)
             {
                 cookingUI.pnl_FryingMinigame = pnl;
@@ -282,31 +282,34 @@ public class PersistentGameManager : MonoBehaviour
             var interactables = root.GetComponentsInChildren<Interactable>(true);
             foreach (var it in interactables)
             {
-                if (!NeedsRuntimeListener(it)) continue;
-
                 string name = it.gameObject.name;
                 if (warehouseUI != null && name.Contains("ColdStorage"))
                 {
-                    it.onInteract.AddListener(warehouseUI.OpenColdStorage);
-                    Debug.Log("PersistentGameManager: wired OpenColdStorage on " + name);
+                    WireListener(it, warehouseUI.OpenColdStorage, "OpenColdStorage", name);
                 }
                 else if (warehouseUI != null && name.Contains("DryStorage"))
                 {
-                    it.onInteract.AddListener(warehouseUI.OpenDryStorage);
-                    Debug.Log("PersistentGameManager: wired OpenDryStorage on " + name);
+                    WireListener(it, warehouseUI.OpenDryStorage, "OpenDryStorage", name);
                 }
                 else if (cookingManager != null && name.Contains("Kitchen"))
                 {
-                    it.onInteract.AddListener(cookingManager.OpenRecipeBook);
-                    Debug.Log("PersistentGameManager: wired OpenRecipeBook on " + name);
+                    WireListener(it, cookingManager.OpenRecipeBook, "OpenRecipeBook", name);
                 }
                 else if (shopUI != null && (name.Contains("TwoFinger") || name.Contains("Shop")))
                 {
-                    it.onInteract.AddListener(shopUI.ToggleShop);
-                    Debug.Log("PersistentGameManager: wired ToggleShop on " + name);
+                    WireListener(it, shopUI.ToggleShop, "ToggleShop", name);
                 }
             }
         }
+    }
+
+    private void WireListener(Interactable interactable, UnityEngine.Events.UnityAction action, string actionName, string objectName)
+    {
+        if (interactable == null || interactable.onInteract == null || action == null) return;
+
+        interactable.onInteract.RemoveListener(action);
+        interactable.onInteract.AddListener(action);
+        Debug.Log("PersistentGameManager: wired " + actionName + " on " + objectName);
     }
 
     private bool NeedsRuntimeListener(Interactable it)

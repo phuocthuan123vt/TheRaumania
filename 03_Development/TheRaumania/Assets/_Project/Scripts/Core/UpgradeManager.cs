@@ -31,6 +31,7 @@ public class UpgradeManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(this.transform.root.gameObject);
+            AutoMapUI();
         }
         else if (Instance != this)
         {
@@ -40,8 +41,51 @@ public class UpgradeManager : MonoBehaviour
 
     private void Start()
     {
+        AutoMapUI();
         if (pnlUpgradeDialog != null) pnlUpgradeDialog.SetActive(false);
         WireButtons();
+    }
+
+    private void AutoMapUI()
+    {
+        Transform root = transform.root;
+
+        if (pnlUpgradeDialog == null) pnlUpgradeDialog = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_UpgradeDialog");
+
+        if (pnlUpgradeDialog != null)
+        {
+            if (txtUpgradeMessage == null) txtUpgradeMessage = pnlUpgradeDialog.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (inputOfferAmount == null) inputOfferAmount = pnlUpgradeDialog.GetComponentInChildren<TMP_InputField>(true);
+
+            if (btnAgree == null)
+            {
+                btnAgree = RuntimeReferenceFinder.FindDeepComponent<Button>(pnlUpgradeDialog.transform, "btnAgree");
+                if (btnAgree == null) btnAgree = FindButtonByText(pnlUpgradeDialog.transform, "Đồng ý");
+            }
+
+            if (btnBargain == null)
+            {
+                btnBargain = RuntimeReferenceFinder.FindDeepComponent<Button>(pnlUpgradeDialog.transform, "btnBargain");
+                if (btnBargain == null) btnBargain = FindButtonByText(pnlUpgradeDialog.transform, "Trả giá");
+            }
+
+            if (btnCancel == null)
+            {
+                btnCancel = RuntimeReferenceFinder.FindDeepComponent<Button>(pnlUpgradeDialog.transform, "btnCancel");
+                if (btnCancel == null) btnCancel = FindButtonByText(pnlUpgradeDialog.transform, "Hủy");
+            }
+        }
+    }
+
+    private Button FindButtonByText(Transform root, string label)
+    {
+        var buttons = root.GetComponentsInChildren<Button>(true);
+        foreach (var button in buttons)
+        {
+            var text = button.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (text != null && text.text != null && text.text.Contains(label)) return button;
+        }
+        return null;
     }
 
     private void WireButtons()

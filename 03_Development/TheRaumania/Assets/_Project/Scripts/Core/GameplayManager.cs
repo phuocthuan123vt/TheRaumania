@@ -4,6 +4,8 @@ using TMPro;
 
 public class GameplayManager : MonoBehaviour
 {
+    public static GameplayManager Instance;
+
     [Header("UI Panels")]
     public GameObject pnlPauseMenu;
     public GameObject pnlSaveDialog;
@@ -14,8 +16,24 @@ public class GameplayManager : MonoBehaviour
 
     private bool _isPaused = false;
 
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        AutoMapUI();
+    }
+
     private void Start()
     {
+        AutoMapUI();
         // Defensive reset to avoid being stuck after entering the game
         Time.timeScale = 1f;
         EnsurePlayerMovementEnabled();
@@ -30,11 +48,17 @@ public class GameplayManager : MonoBehaviour
             PlayerData.decorationScore = passedData.decorationScore;
             PlayerData.satisfactionHistory = new System.Collections.Generic.Queue<float>(passedData.satisfactionHistory);
 
+            RestoreTime(passedData);
+
             RestorePlayerPosition(passedData);
             RestoreWarehouse(passedData);
             RestoreHotbar(passedData);
             
             Debug.Log($"Vào map thành công! Tiền hiện có: {PlayerData.RCredit} RC");
+        }
+        else
+        {
+            ApplyDefaultTimeState();
         }
     }
 
@@ -75,6 +99,7 @@ public class GameplayManager : MonoBehaviour
 
     public void Btn_OpenSaveDialog()
     {
+        AutoMapUI();
         pnlSaveDialog.SetActive(true);
         RefreshSlotsUI();
     }
@@ -84,26 +109,19 @@ public class GameplayManager : MonoBehaviour
     // Khi người chơi ấn chọn Slot lưu
     public void OnSaveSlotClicked(int slotIndex)
     {
-        string name = inputSaveName.text;
-        if (string.IsNullOrEmpty(name)) name = $"SaveData_{slotIndex}";
-
-        // Tóm lấy tài sản hiện tại
-        GameSaveData newDataToSave = new GameSaveData(name, PlayerData.RCredit)
-        {
-            foodQualityScore = PlayerData.foodQualityScore,
-            hygieneScore = PlayerData.hygieneScore,
-            decorationScore = PlayerData.decorationScore,
-            satisfactionHistory = new System.Collections.Generic.List<float>(PlayerData.satisfactionHistory)
-        };
-
-        FillPlayerPosition(newDataToSave);
-        FillWarehouse(newDataToSave);
-        FillUpgradeData(newDataToSave);
-        FillHotbar(newDataToSave);
-        SaveSystem.Save(slotIndex, newDataToSave);
+        SaveActiveGameToSlot(slotIndex, inputSaveName != null ? inputSaveName.text : null);
 
         inputSaveName.text = ""; // Xóa input
         RefreshSlotsUI();        // Load lại chữ
+    }
+
+    public void SaveActiveGameToSlot(int slotIndex, string overrideName = null)
+    {
+        string name = overrideName;
+        if (string.IsNullOrEmpty(name)) name = $"SaveData_{slotIndex}";
+
+        GameSaveData newDataToSave = BuildCurrentSaveData(name);
+        SaveSystem.Save(slotIndex, newDataToSave);
     }
 
     public void Btn_QuitToMenu()
@@ -114,11 +132,51 @@ public class GameplayManager : MonoBehaviour
 
     private void RefreshSlotsUI()
     {
+        if (slotTexts == null || slotTexts.Length == 0)
+        {
+            AutoMapUI();
+        }
+
+        if (slotTexts == null || slotTexts.Length == 0) return;
+
         for (int i = 0; i < slotTexts.Length; i++)
         {
             int slot = i + 1;
             GameSaveData currentSlot = SaveSystem.Load(slot);
-            slotTexts[i].text = currentSlot != null ? $"Slot {slot}: {currentSlot.saveFileName}" : $"Slot {slot}: --- Trống ---";
+            if (slotTexts[i] != null)
+            {
+                slotTexts[i].text = currentSlot != null ? $"Slot {slot}: {currentSlot.saveFileName}" : $"Slot {slot}: --- Trống ---";
+            }
+        }
+    }
+
+    private void AutoMapUI()
+    {
+        Transform root = transform.root;
+
+        if (pnlPauseMenu == null) pnlPauseMenu = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_PauseMenu");
+        if (pnlSaveDialog == null) pnlSaveDialog = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_SaveDialog");
+
+        if (inputSaveName == null && pnlSaveDialog != null)
+        {
+            inputSaveName = pnlSaveDialog.GetComponentInChildren<TMP_InputField>(true);
+        }
+
+        if ((slotTexts == null || slotTexts.Length == 0 || System.Array.Exists(slotTexts, slot => slot == null)) && pnlSaveDialog != null)
+        {
+            var slotButtons = RuntimeReferenceFinder.FindChildrenMatching(
+                pnlSaveDialog.transform,
+                t => t.name.StartsWith("btn_slot_") && t.GetComponent<UnityEngine.UI.Button>() != null);
+
+            slotButtons.Sort((a, b) => a.GetSiblingIndex().CompareTo(b.GetSiblingIndex()));
+
+            int takeCount = Mathf.Min(10, slotButtons.Count);
+            slotTexts = new TextMeshProUGUI[takeCount];
+
+            for (int i = 0; i < takeCount; i++)
+            {
+                slotTexts[i] = slotButtons[i].GetComponentInChildren<TextMeshProUGUI>(true);
+            }
         }
     }
 
@@ -134,6 +192,23 @@ public class GameplayManager : MonoBehaviour
             data.hasPlayerPosition = true;
         }
         data.sceneName = SceneManager.GetActiveScene().name;
+    }
+
+    private void FillTimeData(GameSaveData data)
+    {
+        if (HUDManager.Instance == null)
+        {
+            data.dayCount = 1;
+            data.hourOfDay = 5;
+            data.minuteOfHour = 0;
+            data.hasTimeState = true;
+            return;
+        }
+
+        data.dayCount = HUDManager.Instance.CurrentDay;
+        data.hourOfDay = HUDManager.Instance.CurrentHour;
+        data.minuteOfHour = HUDManager.Instance.CurrentMinute;
+        data.hasTimeState = true;
     }
 
     private void FillWarehouse(GameSaveData data)
@@ -201,6 +276,46 @@ public class GameplayManager : MonoBehaviour
     {
         if (UpgradeManager.Instance == null) return;
         UpgradeManager.Instance.RestoreFromSave(data);
+    }
+
+    private void RestoreTime(GameSaveData data)
+    {
+        if (HUDManager.Instance == null) return;
+
+        if (data != null && data.hasTimeState)
+        {
+            HUDManager.Instance.ApplyTimeState(data.dayCount, data.hourOfDay, data.minuteOfHour);
+        }
+        else
+        {
+            HUDManager.Instance.ApplyTimeState(1, 5, 0);
+        }
+    }
+
+    private void ApplyDefaultTimeState()
+    {
+        if (HUDManager.Instance != null)
+        {
+            HUDManager.Instance.ApplyTimeState(1, 5, 0);
+        }
+    }
+
+    private GameSaveData BuildCurrentSaveData(string saveName)
+    {
+        GameSaveData data = new GameSaveData(saveName, PlayerData.RCredit)
+        {
+            foodQualityScore = PlayerData.foodQualityScore,
+            hygieneScore = PlayerData.hygieneScore,
+            decorationScore = PlayerData.decorationScore,
+            satisfactionHistory = new System.Collections.Generic.List<float>(PlayerData.satisfactionHistory)
+        };
+
+        FillPlayerPosition(data);
+        FillTimeData(data);
+        FillWarehouse(data);
+        FillUpgradeData(data);
+        FillHotbar(data);
+        return data;
     }
 
     private System.Collections.Generic.List<StoredItemData> BuildItemDataList(System.Collections.Generic.List<StoredItem> source)

@@ -13,7 +13,10 @@ public class PhoneController : MonoBehaviour
     private void Awake() { Instance = this; }
     void Update()
     {
-        txtStatusBarTime.text = HUDManager.Instance.txtTime.text;
+        if (txtStatusBarTime != null && HUDManager.Instance != null && HUDManager.Instance.txtTime != null)
+        {
+            txtStatusBarTime.text = HUDManager.Instance.txtTime.text;
+        }
     }
     public void OpenApp(GameObject targetApp)
     {
