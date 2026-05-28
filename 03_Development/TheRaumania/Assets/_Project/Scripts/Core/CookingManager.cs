@@ -17,11 +17,58 @@ public class CookingManager : MonoBehaviour
             Instance = this;
             // Ensure we call DontDestroyOnLoad on the root GameObject to avoid editor warning
             DontDestroyOnLoad(this.transform.root.gameObject);
+            AutoMapMinigames();
         }
         else if (Instance != this)
         {
             Destroy(this.gameObject);
             return;
+        }
+    }
+
+    private void Start()
+    {
+        AutoMapMinigames();
+    }
+
+    private void AutoMapMinigames()
+    {
+        Transform root = transform.root;
+        if (mg1_Prep == null) mg1_Prep = RuntimeReferenceFinder.FindDeepComponent<PrepMinigame>(root, "pnl_PrepMinigame", "pnl_Minigame_Prep");
+        if (mg2_Slicing == null) mg2_Slicing = RuntimeReferenceFinder.FindDeepComponent<SlicingMinigame>(root, "pnl_SlicingMinigame", "pnl_Minigame_Slicing");
+        if (mg3_Frying == null) mg3_Frying = RuntimeReferenceFinder.FindDeepComponent<FryingMinigame>(root, "pnl_FryingMinigame", "pnl_Minigame_Frying");
+
+        if (mg1_Prep == null)
+        {
+            GameObject found = RuntimeReferenceFinder.FindGameObjectInLoadedScenes("pnl_PrepMinigame") ?? RuntimeReferenceFinder.FindGameObjectInLoadedScenes("pnl_Minigame_Prep");
+            if (found != null) mg1_Prep = found.GetComponentInChildren<PrepMinigame>(true);
+        }
+
+        if (mg1_Prep == null)
+        {
+            mg1_Prep = RuntimeReferenceFinder.FindComponentInLoadedScenes<PrepMinigame>();
+        }
+
+        if (mg2_Slicing == null)
+        {
+            GameObject found = RuntimeReferenceFinder.FindGameObjectInLoadedScenes("pnl_SlicingMinigame") ?? RuntimeReferenceFinder.FindGameObjectInLoadedScenes("pnl_Minigame_Slicing");
+            if (found != null) mg2_Slicing = found.GetComponentInChildren<SlicingMinigame>(true);
+        }
+
+        if (mg2_Slicing == null)
+        {
+            mg2_Slicing = RuntimeReferenceFinder.FindComponentInLoadedScenes<SlicingMinigame>();
+        }
+
+        if (mg3_Frying == null)
+        {
+            GameObject found = RuntimeReferenceFinder.FindGameObjectInLoadedScenes("pnl_FryingMinigame") ?? RuntimeReferenceFinder.FindGameObjectInLoadedScenes("pnl_Minigame_Frying");
+            if (found != null) mg3_Frying = found.GetComponentInChildren<FryingMinigame>(true);
+        }
+
+        if (mg3_Frying == null)
+        {
+            mg3_Frying = RuntimeReferenceFinder.FindComponentInLoadedScenes<FryingMinigame>();
         }
     }
     public void OpenRecipeBook()
@@ -67,12 +114,15 @@ public class CookingManager : MonoBehaviour
     }
     private void OnEnable()
     {
+        AutoMapMinigames();
+        if (mg1_Prep == null || mg2_Slicing == null || mg3_Frying == null) return;
         mg1_Prep.OnStepDone += HandlePrepDone;
         mg2_Slicing.OnStepDone += HandleSlicingDone;
         mg3_Frying.OnStepDone += HandleFryingDone;
     }
     private void OnDisable()
     {
+        if (mg1_Prep == null || mg2_Slicing == null || mg3_Frying == null) return;
         mg1_Prep.OnStepDone -= HandlePrepDone;
         mg2_Slicing.OnStepDone -= HandleSlicingDone;
         mg3_Frying.OnStepDone -= HandleFryingDone;
@@ -95,14 +145,41 @@ public class CookingManager : MonoBehaviour
     void StartStep1()
     {
         _avgFreshness = CalculateFreshness();
+        if (mg1_Prep == null)
+        {
+            AutoMapMinigames();
+        }
+        if (mg1_Prep == null)
+        {
+            Debug.LogError("CookingManager: không tìm thấy PrepMinigame/pnl_PrepMinigame/pnl_Minigame_Prep trong scene.");
+            return;
+        }
         mg1_Prep.StartGame(_avgFreshness);
     }
     void StartStep2()
     {
+        if (mg2_Slicing == null)
+        {
+            AutoMapMinigames();
+        }
+        if (mg2_Slicing == null)
+        {
+            Debug.LogError("CookingManager: không tìm thấy SlicingMinigame/pnl_SlicingMinigame/pnl_Minigame_Slicing trong scene.");
+            return;
+        }
         mg2_Slicing.StartGame(_avgFreshness);
     }
     void StartStep3()
     {
+        if (mg3_Frying == null)
+        {
+            AutoMapMinigames();
+        }
+        if (mg3_Frying == null)
+        {
+            Debug.LogError("CookingManager: không tìm thấy FryingMinigame/pnl_FryingMinigame/pnl_Minigame_Frying trong scene.");
+            return;
+        }
         mg3_Frying.StartGame(_avgFreshness);
     }
     void FinalizeDish()

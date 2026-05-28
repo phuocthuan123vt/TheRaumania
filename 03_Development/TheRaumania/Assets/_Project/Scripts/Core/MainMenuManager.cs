@@ -17,13 +17,59 @@ public class MainMenuManager : MonoBehaviour
     [Header("Audio")]
     public AudioSource mainMenuBgm;
 
+    private void Awake()
+    {
+        AutoMapUI();
+    }
+
+    private void Start()
+    {
+        AutoMapUI();
+    }
+
+    private void AutoMapUI()
+    {
+        Transform root = transform.root;
+
+        if (pnlMainMenu == null) pnlMainMenu = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_MainMenu");
+        if (pnlLoadDialog == null) pnlLoadDialog = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_LoadDialog");
+
+        if ((slotTexts == null || slotTexts.Length == 0 || System.Array.Exists(slotTexts, slot => slot == null)) && pnlLoadDialog != null)
+        {
+            var slotButtons = RuntimeReferenceFinder.FindChildrenMatching(
+                pnlLoadDialog.transform,
+                t => t.name.StartsWith("btn_slot_") && t.GetComponent<UnityEngine.UI.Button>() != null);
+
+            slotButtons.Sort((a, b) => a.GetSiblingIndex().CompareTo(b.GetSiblingIndex()));
+
+            int takeCount = Mathf.Min(10, slotButtons.Count);
+            slotTexts = new TextMeshProUGUI[takeCount];
+
+            for (int i = 0; i < takeCount; i++)
+            {
+                slotTexts[i] = slotButtons[i].GetComponentInChildren<TextMeshProUGUI>(true);
+            }
+        }
+
+        if (introController == null) introController = GetComponentInChildren<IntroVideoController>(true);
+        if (mainMenuBgm == null) mainMenuBgm = GetComponentInChildren<AudioSource>(true);
+    }
+
     // Nút New Game
     public void Btn_NewGame()
     {
         // Khởi tạo data mới cứng
-        GameSaveData newData = new GameSaveData("AutoSave_NewGame", 100000);
-        newData.sceneName = "";
+        GameSaveData newData = new GameSaveData("AutoSave_NewGame", 500);
+        newData.sceneName = "scn_Village";
         newData.hasPlayerPosition = false;
+        newData.dayCount = 1;
+        newData.hourOfDay = 5;
+        newData.minuteOfHour = 0;
+        newData.hasTimeState = true;
+        newData.foodQualityScore = 0f;
+        newData.hygieneScore = 0f;
+        newData.decorationScore = 0f;
+        newData.satisfactionHistory.Clear();
         SaveSystem.Save(0, newData); // Lưu tạm vào slot 0 để qua scene kia đọc lại
 
         if (mainMenuBgm != null) mainMenuBgm.Stop();
@@ -68,11 +114,21 @@ public class MainMenuManager : MonoBehaviour
 
     private void RefreshSlotsUI()
     {
+        if (slotTexts == null || slotTexts.Length == 0)
+        {
+            AutoMapUI();
+        }
+
+        if (slotTexts == null || slotTexts.Length == 0) return;
+
         for (int i = 0; i < slotTexts.Length; i++)
         {
             int slot = i + 1;
             GameSaveData currentSlot = SaveSystem.Load(slot);
-            slotTexts[i].text = currentSlot != null ? $"Slot {slot}: {currentSlot.saveFileName}" : $"Slot {slot}: --- Trống ---";
+            if (slotTexts[i] != null)
+            {
+                slotTexts[i].text = currentSlot != null ? $"Slot {slot}: {currentSlot.saveFileName}" : $"Slot {slot}: --- Trống ---";
+            }
         }
     }
 

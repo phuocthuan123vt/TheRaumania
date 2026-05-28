@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.UI;
 
 public class ShopUI : MonoBehaviour
 {
@@ -9,6 +10,31 @@ public class ShopUI : MonoBehaviour
     public GameObject cartLinePrefab;
     public Transform shopContent, cartContent;
     public TextMeshProUGUI txtWallet, txtTotalBill, txtTotalQty;
+
+    private void Awake()
+    {
+        AutoMapUI();
+        AutoWireButtons();
+    }
+
+    private void AutoMapUI()
+    {
+        Transform root = transform.root;
+        if (shopPanel == null) shopPanel = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_Shop");
+        if (shopContent == null)
+        {
+            GameObject found = RuntimeReferenceFinder.FindDeepGameObject(root, "shopContent");
+            if (found != null) shopContent = found.transform;
+        }
+        if (cartContent == null)
+        {
+            GameObject found = RuntimeReferenceFinder.FindDeepGameObject(root, "cartContent");
+            if (found != null) cartContent = found.transform;
+        }
+        if (txtWallet == null) txtWallet = RuntimeReferenceFinder.FindDeepComponent<TextMeshProUGUI>(root, "txt_Wallet");
+        if (txtTotalBill == null) txtTotalBill = RuntimeReferenceFinder.FindDeepComponent<TextMeshProUGUI>(root, "txt_TotalBill");
+        if (txtTotalQty == null) txtTotalQty = RuntimeReferenceFinder.FindDeepComponent<TextMeshProUGUI>(root, "txt_TotalQty");
+    }
 
     private void OnEnable()
     {
@@ -24,8 +50,29 @@ public class ShopUI : MonoBehaviour
 
     private void Start()
     {
+        AutoMapUI();
+        AutoWireButtons();
         RefreshCatalog();
         RefreshCart();
+    }
+
+    private void AutoWireButtons()
+    {
+        if (shopPanel == null) return;
+
+        WireButton("btn_Checkout", OnClickCheckout);
+        WireButton("btn_Cancel", OnClickCancel);
+    }
+
+    private void WireButton(string buttonName, UnityEngine.Events.UnityAction action)
+    {
+        if (string.IsNullOrEmpty(buttonName) || action == null) return;
+
+        Button button = RuntimeReferenceFinder.FindDeepComponent<Button>(shopPanel.transform, buttonName);
+        if (button == null) return;
+
+        button.onClick.RemoveListener(action);
+        button.onClick.AddListener(action);
     }
 
     public void ToggleShop()

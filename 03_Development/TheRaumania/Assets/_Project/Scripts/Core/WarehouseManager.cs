@@ -22,15 +22,6 @@ public class WarehouseManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    private void Update()
-    {
-        UpdateAllFreshness();
-    }
-    private void UpdateAllFreshness()
-    {
-        foreach (var item in dryStorage) item.Decay(_dryStorageMultiplier);
-        foreach (var item in coldStorage) item.Decay(_coldStorageMultiplier);
-    }
     public void AddItemToWarehouse(BaseItemSO item, int qty)
     {
         StoredItem newItem = new StoredItem(item, qty);
@@ -54,8 +45,9 @@ public class WarehouseManager : MonoBehaviour
     }
     public void OnHourPassed()
     {
-        foreach (var item in dryStorage) item.currentFreshness -= 1;
-        foreach (var item in coldStorage) item.currentFreshness -= 0.5f;
+        foreach (var item in dryStorage) item.Decay(_dryStorageMultiplier);
+        foreach (var item in coldStorage) item.Decay(_coldStorageMultiplier);
+
         Debug.Log("Một giờ game đã trôi qua, thực phẩm đang héo dần...");
     }
 }

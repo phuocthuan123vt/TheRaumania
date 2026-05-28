@@ -9,6 +9,28 @@ public class WarehouseUI : MonoBehaviour
     public GameObject warehousePanel;
     public TextMeshProUGUI txtTitle; // (Tùy chọn) Để hiện chữ "KHO LẠNH" hoặc "KHO KHÔ"
 
+    private void Awake()
+    {
+        AutoMapUI();
+    }
+
+    private void Start()
+    {
+        AutoMapUI();
+    }
+
+    private void AutoMapUI()
+    {
+        Transform root = transform.root;
+        if (warehousePanel == null) warehousePanel = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_Warehouse");
+        if (contentArea == null)
+        {
+            GameObject content = RuntimeReferenceFinder.FindDeepGameObject(root, "contentArea");
+            if (content != null) contentArea = content.transform;
+        }
+        if (txtTitle == null) txtTitle = RuntimeReferenceFinder.FindDeepComponent<TextMeshProUGUI>(root, "txtTitle");
+    }
+
     // Tạo một biến để nhớ loại kho đang mở
     private StorageType _currentFilter;
 

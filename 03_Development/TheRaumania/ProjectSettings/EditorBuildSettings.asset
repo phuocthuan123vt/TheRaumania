@@ -29,4 +29,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/scn_UpgradeStore.unity
     guid: fc40614c46ac20f4db24000dac744dcf
+  - enabled: 1
+    path: Assets/_Project/Scenes/scn_Home.unity
+    guid: 11a506cfb267e544fbb81d4353e87a5f
   m_configObjects: {}

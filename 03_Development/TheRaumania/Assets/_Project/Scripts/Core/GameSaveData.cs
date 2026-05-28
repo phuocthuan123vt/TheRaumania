@@ -7,6 +7,12 @@ public class GameSaveData
     public string saveFileName; 
     public int rCredit;
 
+    // Time system
+    public int dayCount = 1;
+    public int hourOfDay = 5;
+    public int minuteOfHour = 0;
+    public bool hasTimeState;
+
     // Player position and scene
     public string sceneName;
     public float playerPosX;
@@ -36,6 +42,10 @@ public class GameSaveData
     {
         this.saveFileName = fileName;
         this.rCredit = money;
+        this.dayCount = 1;
+        this.hourOfDay = 5;
+        this.minuteOfHour = 0;
+        this.hasTimeState = true;
     }
 }
 

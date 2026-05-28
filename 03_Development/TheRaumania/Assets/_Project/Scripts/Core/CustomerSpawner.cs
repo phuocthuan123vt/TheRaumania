@@ -33,6 +33,12 @@ public class CustomerSpawner : MonoBehaviour
 
         while (isSpawning)
         {
+            if (HUDManager.Instance != null && !HUDManager.Instance.IsRestaurantOpen)
+            {
+                yield return new WaitForSeconds(1f);
+                continue;
+            }
+
             // 1. Lấy số sao hiện tại
             float currentStars = 1f;
             if (RestaurantRatingManager.Instance != null)
@@ -46,6 +52,11 @@ public class CustomerSpawner : MonoBehaviour
             float currentDelay = Mathf.Lerp(maxSpawnDelay, minSpawnDelay, t);
 
             yield return new WaitForSeconds(currentDelay);
+
+            if (HUDManager.Instance != null && !HUDManager.Instance.IsRestaurantOpen)
+            {
+                continue;
+            }
 
             // 3. Sinh khách
             SpawnCustomer(currentStars);
