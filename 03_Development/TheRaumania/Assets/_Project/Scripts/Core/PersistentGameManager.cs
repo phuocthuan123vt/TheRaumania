@@ -59,10 +59,116 @@ public class PersistentGameManager : MonoBehaviour
         // Cập nhật trạng thái Managers và hiển thị renderer cho scene mới
         UpdateManagersForActiveScene(scene);
         UpdateActiveSceneVisuals(scene);
-        // Map UI panels from the scene into persistent managers (so CookingUIManager gets its panels)
+        // Map scene UI panels from the scene into persistent managers (so CookingUIManager gets its panels)
         MapSceneUIToManagers(scene);
         // Wire storage/kitchen interactables if their UnityEvent targets were lost
         WireSceneInteractables(scene);
+        // Prevent duplicate audio managers: if we have a persistent AudioManager, disable the scene one
+        EnsureSingleAudioManager(scene);
+        // Ensure exactly one AudioListener is enabled in the loaded scene
+        EnsureSingleAudioListener();
+    }
+
+    private void EnsureSingleAudioListener()
+    {
+        // Find all AudioListener components in the current application domain
+        var listeners = UnityEngine.Object.FindObjectsOfType<UnityEngine.AudioListener>(true);
+        if (listeners == null || listeners.Length == 0) return;
+
+        // Prefer an AudioListener that is child of our persistent root
+        UnityEngine.AudioListener preferred = null;
+        foreach (var l in listeners)
+        {
+            if (l != null && l.transform.IsChildOf(this.transform))
+            {
+                preferred = l;
+                break;
+            }
+        }
+
+        if (preferred == null)
+        {
+            // Otherwise pick the first enabled listener or the first one
+            foreach (var l in listeners) if (l.enabled) { preferred = l; break; }
+            if (preferred == null) preferred = listeners[0];
+        }
+
+        // Enable preferred, disable others
+        foreach (var l in listeners)
+        {
+            if (l == null) continue;
+            if (l == preferred)
+            {
+                if (!l.enabled) l.enabled = true;
+                continue;
+            }
+            if (l.enabled)
+            {
+                l.enabled = false;
+                Debug.Log($"PersistentGameManager: Disabled extra AudioListener on '{l.gameObject.name}'.");
+            }
+        }
+    }
+
+    private void EnsureSingleAudioManager(Scene scene)
+    {
+        if (!scene.IsValid()) return;
+
+        // Find if a persistent AudioManager exists under our persistent root
+        Transform persistentAudioManager = null;
+        var allPersistentTransforms = this.transform.GetComponentsInChildren<Transform>(true);
+        foreach (var t in allPersistentTransforms)
+        {
+            if (t != null && t.name == "AudioManager")
+            {
+                persistentAudioManager = t;
+                break;
+            }
+        }
+
+        AudioSource persistentSource = null;
+        if (persistentAudioManager != null)
+        {
+            persistentSource = persistentAudioManager.GetComponent<AudioSource>();
+        }
+
+        var roots = scene.GetRootGameObjects();
+        foreach (var root in roots)
+        {
+            if (root == null) continue;
+            if (root.name == "AudioManager")
+            {
+                if (persistentAudioManager != null)
+                {
+                    // Copy scene BGM setup to persistent source so each scene keeps its own music.
+                    var src = root.GetComponent<AudioSource>();
+                    if (persistentSource != null && src != null)
+                    {
+                        bool clipChanged = persistentSource.clip != src.clip;
+                        persistentSource.clip = src.clip;
+                        persistentSource.loop = src.loop;
+                        persistentSource.volume = src.volume;
+                        persistentSource.pitch = src.pitch;
+                        persistentSource.mute = src.mute;
+
+                        // Ensure expected playback state for this scene
+                        if (src.playOnAwake || src.isPlaying || clipChanged)
+                        {
+                            persistentSource.Stop();
+                            if (persistentSource.clip != null)
+                            {
+                                persistentSource.Play();
+                            }
+                        }
+                    }
+
+                    // Stop and disable the scene AudioManager to avoid duplicate BGM
+                    if (src != null && src.isPlaying) src.Stop();
+                    root.SetActive(false);
+                    Debug.Log($"PersistentGameManager: Disabled scene AudioManager '{root.name}' because persistent one exists.");
+                }
+            }
+        }
     }
 
     // Luôn giữ Managers trong PersistentGameManager hoạt động; tắt Managers scene-local để tránh duplicate singletons
@@ -367,31 +473,56 @@ public class PersistentGameManager : MonoBehaviour
     private void EnsureSingleEventSystem()
     {
         EventSystem[] systems = FindObjectsOfType<EventSystem>(true);
-        if (systems == null || systems.Length <= 1) return;
+        if (systems == null || systems.Length == 0) return;
 
         EventSystem preferred = null;
-        // ưu tiên EventSystem con của PersistentGameManager
+
+        // 1) ưu tiên EventSystem đang active + enabled
         foreach (var s in systems)
         {
-            if (s.gameObject.transform.IsChildOf(this.transform))
+            if (s != null && s.enabled && s.gameObject.activeInHierarchy)
             {
                 preferred = s;
                 break;
             }
         }
+
+        // 2) nếu chưa có, ưu tiên EventSystem con của PersistentGameManager
         if (preferred == null)
         {
-            // nếu không có, chọn EventSystem hiện đang active
-            foreach (var s in systems) if (s.gameObject.activeInHierarchy) { preferred = s; break; }
-            if (preferred == null) preferred = systems[0];
+            foreach (var s in systems)
+            {
+                if (s != null && s.gameObject.transform.IsChildOf(this.transform))
+                {
+                    preferred = s;
+                    break;
+                }
+            }
         }
 
+        // 3) fallback: phần tử đầu tiên
+        if (preferred == null) preferred = systems[0];
+
+        // Ensure preferred EventSystem is actually enabled and active
+        if (preferred != null)
+        {
+            if (!preferred.gameObject.activeSelf)
+            {
+                preferred.gameObject.SetActive(true);
+            }
+            if (!preferred.enabled)
+            {
+                preferred.enabled = true;
+            }
+        }
+
+        // Disable extra EventSystems (component only) to avoid disabling unrelated objects
         foreach (var s in systems)
         {
-            if (s == preferred) continue;
-            if (s.gameObject.activeInHierarchy)
+            if (s == null || s == preferred) continue;
+            if (s.enabled)
             {
-                s.gameObject.SetActive(false);
+                s.enabled = false;
                 Debug.Log($"PersistentGameManager: disabled duplicate EventSystem '{s.gameObject.name}' from scene.");
             }
         }

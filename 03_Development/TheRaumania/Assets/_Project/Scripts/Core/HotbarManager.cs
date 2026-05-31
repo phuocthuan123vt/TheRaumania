@@ -160,12 +160,23 @@ public class HotbarManager : MonoBehaviour
             return;
         }
 
+        if (items == null)
+        {
+            items = new List<StoredItem>();
+        }
+
         for (int i = 0; i < uiSlots.Length; i++)
         {
-            if (i < items.Count && items[i] != null)
+            if (uiSlots[i] == null) continue;
+
+            if (i < items.Count && items[i] != null && items[i].itemData != null)
+            {
                 uiSlots[i].Setup(items[i]);
+            }
             else
+            {
                 uiSlots[i].Clear();
+            }
         }
     }
 
@@ -182,6 +193,6 @@ public class HotbarManager : MonoBehaviour
 
     private void OnValidate()
     {
-        if (Instance != null) RefreshUI();
+        if (Instance != null && Application.isPlaying) RefreshUI();
     }
 }

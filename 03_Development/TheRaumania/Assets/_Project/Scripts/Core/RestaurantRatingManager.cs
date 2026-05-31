@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 using System;
+using System.Text;
 using TMPro;
 
 public class RestaurantRatingManager : MonoBehaviour
@@ -66,16 +67,61 @@ public class RestaurantRatingManager : MonoBehaviour
     /// </summary>
     public float GetRestaurantStars()
     {
+        return Mathf.Clamp(GetRawStarScore(), 1f, 5f);
+    }
+
+    public float GetRawStarScore()
+    {
         float food = PlayerData.foodQualityScore;
         float hygiene = PlayerData.hygieneScore;
-        float decor = PlayerData.decorationScore;
+        float decor = GetDecorationScore();
         float attitude = GetAttitudeScore();
 
         // Tổng max = 40. Công thức quy đổi ra 5 sao: Total / 8.
-        float rawStars = (food + hygiene + decor + attitude) / 8f;
+        return (food + hygiene + decor + attitude) / 8f;
+    }
 
-        // Ép giới hạn từ 1 đến 5 sao
-        return Mathf.Clamp(rawStars, 1f, 5f);
+    public string GetScoreBreakdownText()
+    {
+        float food = PlayerData.foodQualityScore;
+        float hygiene = PlayerData.hygieneScore;
+        float decor = GetDecorationScore();
+        float attitude = GetAttitudeScore();
+        float stars = GetRestaurantStars();
+
+        StringBuilder builder = new StringBuilder();
+        builder.AppendLine("<b>Điểm nhà hàng</b>");
+        builder.AppendLine($"Món ăn: {food:0.0}/10");
+        builder.AppendLine($"Vệ sinh: {hygiene:0.0}/10");
+        builder.AppendLine($"Trang trí: {decor:0.0}/10");
+        builder.AppendLine($"Thái độ: {attitude:0.0}/10");
+        builder.AppendLine($"Tổng: {stars:0.0}/5 sao");
+        return builder.ToString();
+    }
+
+    public float GetDecorationScore()
+    {
+        if (UpgradeManager.Instance == null)
+        {
+            return PlayerData.decorationScore;
+        }
+
+        switch (Mathf.Clamp(UpgradeManager.Instance.highestUnlockedLevel, 1, 3))
+        {
+            case 1:
+                return 3f;
+            case 2:
+                return 6f;
+            case 3:
+                return 10f;
+            default:
+                return 3f;
+        }
+    }
+
+    public void RefreshRating()
+    {
+        BroadcastRating();
     }
 
     void BroadcastRating()

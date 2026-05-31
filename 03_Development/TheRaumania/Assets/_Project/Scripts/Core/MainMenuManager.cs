@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -53,11 +54,21 @@ public class MainMenuManager : MonoBehaviour
 
         if (introController == null) introController = GetComponentInChildren<IntroVideoController>(true);
         if (mainMenuBgm == null) mainMenuBgm = GetComponentInChildren<AudioSource>(true);
+
+        AudioSettingsManager.EnsureInstance();
+
+        WireSettingsButton();
     }
 
     // Nút New Game
     public void Btn_NewGame()
     {
+        // Defensive: clear any lingering gameplay pause UI/state before starting a new run
+        ForceResetGameplayPauseState();
+
+        // Force default spawn for a true New Game start in village
+        PersistentGameManager.TargetSpawnPointName = "Village_EntryPoint_FromHome";
+
         // Khởi tạo data mới cứng
         GameSaveData newData = new GameSaveData("AutoSave_NewGame", 500);
         newData.sceneName = "scn_Village";
@@ -67,20 +78,55 @@ public class MainMenuManager : MonoBehaviour
         newData.minuteOfHour = 0;
         newData.hasTimeState = true;
         newData.foodQualityScore = 0f;
-        newData.hygieneScore = 0f;
-        newData.decorationScore = 0f;
+        newData.hygieneScore = 10f;
+        newData.decorationScore = 3f;
         newData.satisfactionHistory.Clear();
         SaveSystem.Save(0, newData); // Lưu tạm vào slot 0 để qua scene kia đọc lại
+        Debug.Log("MainMenuManager: Btn_NewGame - saved new game to slot 0.");
 
+        // Stop any main menu BGM or other AudioManager instances to avoid overlap
         if (mainMenuBgm != null) mainMenuBgm.Stop();
+        var sceneAudio = GameObject.Find("AudioManager");
+        if (sceneAudio != null)
+        {
+            var src = sceneAudio.GetComponent<AudioSource>();
+            if (src != null && src.isPlaying) src.Stop();
+        }
+
+        // Keep intro overlay lifecycle inside IntroVideoController to avoid destroy-in-frame race
 
         if (introController != null)
         {
-            introController.PlayIntro(() => LoadGameplayScene("scn_Village"));
+            if (pnlMainMenu != null) pnlMainMenu.SetActive(false);
+            Debug.Log("MainMenuManager: Btn_NewGame - starting intro.");
+            introController.PlayIntro(() => {
+                Debug.Log("MainMenuManager: Intro finished, loading gameplay scene scn_Village.");
+                LoadGameplayScene("scn_Village");
+            });
         }
         else
         {
+            Debug.Log("MainMenuManager: Btn_NewGame - no intro controller, loading gameplay scene immediately.");
             LoadGameplayScene("scn_Village");
+        }
+    }
+
+    private void ForceResetGameplayPauseState()
+    {
+        var gameplay = FindObjectOfType<GameplayManager>(true);
+        if (gameplay != null)
+        {
+            gameplay.ForceUnpause();
+        }
+        else
+        {
+            Time.timeScale = 1f;
+
+            var pausePanel = GameObject.Find("pnl_PauseMenu");
+            if (pausePanel != null && pausePanel.activeSelf) pausePanel.SetActive(false);
+
+            var saveDialog = GameObject.Find("pnl_SaveDialog");
+            if (saveDialog != null && saveDialog.activeSelf) saveDialog.SetActive(false);
         }
     }
 
@@ -112,6 +158,11 @@ public class MainMenuManager : MonoBehaviour
 
     public void Btn_Quit() => Application.Quit();
 
+    public void Btn_OpenSettings()
+    {
+        AudioSettingsManager.EnsureInstance().OpenSettings();
+    }
+
     private void RefreshSlotsUI()
     {
         if (slotTexts == null || slotTexts.Length == 0)
@@ -136,12 +187,26 @@ public class MainMenuManager : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(overrideScene))
         {
+            Debug.Log($"MainMenuManager: LoadGameplayScene requested override '{overrideScene}'.");
             SceneManager.LoadScene(overrideScene);
             return;
         }
 
         GameSaveData data = SaveSystem.Load(0);
         string sceneName = (data != null && !string.IsNullOrEmpty(data.sceneName)) ? data.sceneName : "scn_Village";
+        Debug.Log($"MainMenuManager: LoadGameplayScene loading '{sceneName}' from save slot 0.");
         SceneManager.LoadScene(sceneName);
+    }
+
+    private void WireSettingsButton()
+    {
+        if (pnlMainMenu == null) return;
+
+        var settingsButton = RuntimeReferenceFinder.FindDeepComponent<Button>(pnlMainMenu.transform, "btn_settings", "btn_Settings", "Settings");
+        if (settingsButton != null)
+        {
+            settingsButton.onClick.RemoveAllListeners();
+            settingsButton.onClick.AddListener(Btn_OpenSettings);
+        }
     }
 }

@@ -22,12 +22,25 @@ public class CheatConsole : MonoBehaviour
 
     private void Update()
     {
-        // Phím ~ hoặc ` để bật/tắt (BackQuote)
-        if (Input.GetKeyDown(KeyCode.BackQuote))
+        // Phím ~ hoặc ` để bật/tắt (BackQuote), plus inputString fallback for keyboard layouts
+        if (IsToggleKeyPressed())
         {
             showConsole = !showConsole;
             if (showConsole) input = ""; // Reset khi mở lại
         }
+    }
+
+    private bool IsToggleKeyPressed()
+    {
+        if (Input.GetKeyDown(KeyCode.BackQuote)) return true;
+
+        string typed = Input.inputString;
+        if (!string.IsNullOrEmpty(typed) && (typed.Contains("`") || typed.Contains("~")))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void OnGUI()
