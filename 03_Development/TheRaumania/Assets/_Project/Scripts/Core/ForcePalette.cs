@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
 
 public class ForcePalette
@@ -19,3 +21,4 @@ public class ForcePalette
         Debug.Log("<color=green>Đã tạo thành công Palette tại: </color>" + path);
     }
 }
+#endif

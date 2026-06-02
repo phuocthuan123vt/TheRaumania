@@ -188,6 +188,13 @@ public class GameplayManager : MonoBehaviour
         SaveSystem.Save(slotIndex, newDataToSave);
     }
 
+    public void SaveTransientStateToSlot0()
+    {
+        // Slot 0 is used as the handoff buffer between scenes.
+        // Before any portal transition, snapshot the current runtime state so it won't fall back to new-game data.
+        SaveActiveGameToSlot(0, "AutoSave_Transit");
+    }
+
     public void Btn_QuitToMenu()
     {
         ForceUnpause(); // Chắc chắn xả Pause trước khi quay về Menu

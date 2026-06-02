@@ -37,7 +37,7 @@ public class HUDManager : MonoBehaviour
     public int CurrentDay => _day;
     public int CurrentHour => _hour;
     public int CurrentMinute => _minute;
-    public bool IsRestaurantOpen => _hour >= 9 && _hour < 22;
+    public bool IsRestaurantOpen => _hour >= 7 && _hour < 22;
 
     private void Awake()
     {

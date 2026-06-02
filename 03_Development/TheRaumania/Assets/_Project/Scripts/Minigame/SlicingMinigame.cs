@@ -9,6 +9,7 @@ public class SlicingMinigame : MinigameBase
     public RectTransform imgTargetZone;
     [Header("Settings")]
     public float baseSpeed = 2.5f;
+    [SerializeField] private float _defaultBaseSpeed = 2.5f;
     public float tolerance = 0.06f; 
     private float _targetValue;
     private int _totalSlices;
@@ -22,8 +23,12 @@ public class SlicingMinigame : MinigameBase
         _totalSlices = Random.Range(4, 7); 
         _currentSliceCount = 0;
         _sliceScores.Clear();
-        float speedMult = (freshness < 50) ? 0.8f : 0.25f;
-        baseSpeed *= speedMult;
+        // Fresh ingredients should still be faster than the current implementation,
+        // but remain slower than lower-freshness ingredients.
+        float freshness01 = Mathf.Clamp01(freshness / 100f);
+        float lowFreshnessSpeed = _defaultBaseSpeed * 3.2f;
+        float highFreshnessSpeed = _defaultBaseSpeed * 1.8f;
+        baseSpeed = Mathf.Lerp(lowFreshnessSpeed, highFreshnessSpeed, freshness01);
         StartNextSlice();
     }
     void StartNextSlice()
