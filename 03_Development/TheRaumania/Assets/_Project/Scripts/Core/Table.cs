@@ -13,4 +13,25 @@ public class Table : MonoBehaviour
 
     public Seat[] seats;
     public bool isNearWindow;
+
+    private void Start()
+    {
+        Interactable interactable = GetComponent<Interactable>();
+        if (interactable == null)
+        {
+            interactable = gameObject.AddComponent<Interactable>();
+        }
+        interactable.interactMessage = "Nhấn E để xếp bàn";
+        interactable.interactRange = 2f;
+        interactable.onInteract.RemoveAllListeners();
+        interactable.onInteract.AddListener(OnTableInteracted);
+    }
+
+    private void OnTableInteracted()
+    {
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.OnPlayerInteractWithTable(this);
+        }
+    }
 }
