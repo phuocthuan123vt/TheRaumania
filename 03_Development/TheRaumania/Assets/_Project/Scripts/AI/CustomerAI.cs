@@ -8,7 +8,7 @@ using BehaviorTree;
 
 public class CustomerAI : MonoBehaviour
 {
-    public enum CustomerState { Queueing, WalkingToTable, Ordering, WaitingForFood, Eating, CheckingOut, Leaving }
+    public enum CustomerState { Queueing, BeingLed, WalkingToTable, Ordering, WaitingForFood, Eating, CheckingOut, Leaving }
 
     [Header("Du lieu & Trang thai")]
     public CustomerProfileSO profile;
@@ -55,6 +55,8 @@ public class CustomerAI : MonoBehaviour
     public int _mySeatIndex;
 
     public bool isSpecialRequestMet = false;
+    public bool wantsWindowSeat = false;
+    private TMPro.TextMeshProUGUI _windowSeatText;
     public GameObject dirtPrefab;
 
     private void Awake()
@@ -82,6 +84,24 @@ public class CustomerAI : MonoBehaviour
     {
         currentState = CustomerState.Queueing;
         ConstructBehaviorTree();
+
+        // Tỷ lệ ngẫu nhiên có nhu cầu ngồi bàn cửa sổ theo Profile
+        float windowDemandChance = 0.15f; // Mặc định Chill: 15%
+        if (profile != null)
+        {
+            if (profile.type == CustomerType.RichAndRush) windowDemandChance = 0.5f;     // VIP: 50%
+            else if (profile.type == CustomerType.FoodCritic) windowDemandChance = 0.3f; // Critic: 30%
+        }
+        wantsWindowSeat = Random.value < windowDemandChance;
+
+        if (wantsWindowSeat)
+        {
+            EnsureWindowSeatUI();
+            if (_windowSeatText != null)
+            {
+                _windowSeatText.gameObject.SetActive(true);
+            }
+        }
     }
 
     private Transform FindCheckoutTransform()
@@ -121,7 +141,7 @@ public class CustomerAI : MonoBehaviour
 
         ActionNode checkIfAtTable = new ActionNode(() =>
         {
-            if (currentState == CustomerState.Queueing) return NodeState.Failure;
+            if (currentState == CustomerState.Queueing || currentState == CustomerState.BeingLed) return NodeState.Failure;
             if (currentState == CustomerState.WalkingToTable)
             {
                 if (!_agent.pathPending && _agent.remainingDistance < 0.1f)
@@ -243,6 +263,11 @@ public class CustomerAI : MonoBehaviour
         UpdateVisuals();
         UpdateContextualReactions();
 
+        if (currentState == CustomerState.BeingLed)
+        {
+            FollowPlayer();
+        }
+
         if (_isPatienceActive && currentState != CustomerState.Leaving)
         {
             _rootNode?.Evaluate();
@@ -278,6 +303,7 @@ public class CustomerAI : MonoBehaviour
         {
             _agent.enabled = true;
             _agent.isStopped = false;
+            _agent.stoppingDistance = 0f; // Reset stopping distance so they walk all the way to the chair
             _agent.ResetPath();
             if (assignedTable.seats[_mySeatIndex].point != null)
             {
@@ -294,6 +320,8 @@ public class CustomerAI : MonoBehaviour
     {
         currentState = CustomerState.Ordering;
         _agent.enabled = false;
+        if (_agent != null) _agent.stoppingDistance = 0f;
+
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null) rb.simulated = false;
 
@@ -302,7 +330,29 @@ public class CustomerAI : MonoBehaviour
         _anim.SetBool("IsMoving", false);
         _anim.SetFloat("SitX", _targetSitX);
 
+        if (_windowSeatText != null)
+        {
+            _windowSeatText.gameObject.SetActive(false);
+        }
+
         ApplySeatComfortBonus();
+
+        if (wantsWindowSeat)
+        {
+            if (assignedTable != null && assignedTable.isNearWindow)
+            {
+                ShowEmote(emoteHappy);
+                isSpecialRequestMet = true;
+                Debug.Log("<color=cyan>Khách rất thích ngồi bàn gần cửa sổ này!</color>");
+            }
+            else
+            {
+                ShowEmote(emoteAngry);
+                isSpecialRequestMet = false;
+                Debug.Log("<color=red>Khách thất vọng vì không được ngồi bàn gần cửa sổ!</color>");
+                _moodReactionCooldown = 2.0f;
+            }
+        }
 
         RecipeBookUI recipeBook = FindObjectOfType<RecipeBookUI>(true);
         if (recipeBook != null && recipeBook.allRecipes != null && recipeBook.allRecipes.Count > 0)
@@ -872,7 +922,42 @@ public class CustomerAI : MonoBehaviour
     {
         float baseRate = profile != null ? profile.patienceDecayRate : 1f;
         float hygieneMultiplier = Mathf.Lerp(0.9f, 1.55f, Mathf.Clamp01((10f - PlayerData.hygieneScore) / 10f) * (profile != null ? profile.hygieneSensitivity : 1f));
-        float seatMultiplier = assignedTable != null && assignedTable.isNearWindow ? 0.9f : 1f;
+        
+        float seatMultiplier = 1f;
+        if (assignedTable != null)
+        {
+            bool gotWindow = assignedTable.isNearWindow;
+            if (wantsWindowSeat)
+            {
+                if (gotWindow)
+                {
+                    // Ngồi đúng bàn cửa sổ -> Giảm tốc độ mất kiên nhẫn
+                    switch (profile?.type)
+                    {
+                        case CustomerType.Chill: seatMultiplier = 0.85f; break;
+                        case CustomerType.RichAndRush: seatMultiplier = 0.6f; break; // VIP kiên nhẫn hơn hẳn (-40%)
+                        case CustomerType.FoodCritic: seatMultiplier = 0.7f; break;   // Critic kiên nhẫn hơn (-30%)
+                        default: seatMultiplier = 0.8f; break;
+                    }
+                }
+                else
+                {
+                    // Muốn ngồi cửa sổ nhưng phải ngồi bàn thường -> Sốt ruột hơn
+                    switch (profile?.type)
+                    {
+                        case CustomerType.Chill: seatMultiplier = 1.05f; break;
+                        case CustomerType.RichAndRush: seatMultiplier = 1.25f; break; // VIP sốt ruột hơn (+25%)
+                        case CustomerType.FoodCritic: seatMultiplier = 1.3f; break;    // Critic sốt ruột hơn (+30%)
+                        default: seatMultiplier = 1.1f; break;
+                    }
+                }
+            }
+            else
+            {
+                seatMultiplier = gotWindow ? 0.9f : 1f;
+            }
+        }
+        
         return baseRate * hygieneMultiplier * seatMultiplier;
     }
 
@@ -883,13 +968,27 @@ public class CustomerAI : MonoBehaviour
             return;
         }
 
-        if (assignedTable.isNearWindow)
+        if (wantsWindowSeat)
         {
-            currentPatience = Mathf.Min(100f, currentPatience + 6f);
+            if (assignedTable.isNearWindow)
+            {
+                currentPatience = Mathf.Min(100f, currentPatience + 10f); // Cộng hẳn 10 điểm kiên nhẫn khi được ngồi đúng chỗ yêu thích
+            }
+            else
+            {
+                currentPatience = Mathf.Min(100f, currentPatience - 5f); // Trừ 5 điểm kiên nhẫn nếu bị thất vọng
+            }
         }
         else
         {
-            currentPatience = Mathf.Min(100f, currentPatience + 2f);
+            if (assignedTable.isNearWindow)
+            {
+                currentPatience = Mathf.Min(100f, currentPatience + 5f);
+            }
+            else
+            {
+                currentPatience = Mathf.Min(100f, currentPatience + 2f);
+            }
         }
     }
 
@@ -907,7 +1006,40 @@ public class CustomerAI : MonoBehaviour
             return 5f;
         }
 
-        float seatScore = assignedTable.isNearWindow ? 8.5f : 5.5f;
+        bool gotWindow = assignedTable.isNearWindow;
+        float seatScore = 5.5f;
+
+        if (wantsWindowSeat)
+        {
+            if (gotWindow)
+            {
+                // Thỏa mãn nhu cầu ngồi cửa sổ
+                switch (profile?.type)
+                {
+                    case CustomerType.Chill: seatScore = 8.5f; break;
+                    case CustomerType.RichAndRush: seatScore = 9.5f; break; // VIP rất thích
+                    case CustomerType.FoodCritic: seatScore = 10f; break;   // Critic cực thích
+                    default: seatScore = 8.5f; break;
+                }
+            }
+            else
+            {
+                // Có nhu cầu nhưng không được ngồi bàn cửa sổ -> bị thất vọng
+                switch (profile?.type)
+                {
+                    case CustomerType.Chill: seatScore = 4.5f; break;
+                    case CustomerType.RichAndRush: seatScore = 3.5f; break; // VIP thất vọng
+                    case CustomerType.FoodCritic: seatScore = 2.0f; break;   // Critic trừ nặng điểm
+                    default: seatScore = 4.0f; break;
+                }
+            }
+        }
+        else
+        {
+            // Không có nhu cầu cửa sổ, ngồi đâu cũng được nhưng ngồi cửa sổ vẫn cộng nhẹ
+            seatScore = gotWindow ? 7.5f : 5.5f;
+        }
+
         seatScore += Mathf.Clamp(_targetSitX, -1f, 1f) * 0.5f;
         return Mathf.Clamp(seatScore, 0f, 10f);
     }
@@ -915,16 +1047,57 @@ public class CustomerAI : MonoBehaviour
     private float GetFoodSatisfactionPatienceBonus()
     {
         float hygieneFactor = Mathf.Clamp01(PlayerData.hygieneScore / 10f);
-        float seatBonus = assignedTable != null && assignedTable.isNearWindow ? 4f : 1.5f;
+        float seatBonus = 1.5f;
+        if (assignedTable != null)
+        {
+            bool gotWindow = assignedTable.isNearWindow;
+            if (wantsWindowSeat)
+            {
+                seatBonus = gotWindow ? 5f : -2f; // Trừ kiên nhẫn nếu không thỏa mãn
+            }
+            else
+            {
+                seatBonus = gotWindow ? 3f : 1.5f;
+            }
+        }
         return 8f + (hygieneFactor * 4f) + seatBonus;
     }
 
     private float GetServiceTipMultiplier()
     {
         float multiplier = 1f;
-        if (assignedTable != null && assignedTable.isNearWindow)
+        if (assignedTable != null)
         {
-            multiplier *= 1.12f;
+            bool gotWindow = assignedTable.isNearWindow;
+            if (wantsWindowSeat)
+            {
+                if (gotWindow)
+                {
+                    // Thỏa mãn nhu cầu cửa sổ -> Cộng tip nhiều
+                    switch (profile?.type)
+                    {
+                        case CustomerType.Chill: multiplier *= 1.15f; break;
+                        case CustomerType.RichAndRush: multiplier *= 1.5f; break;  // VIP tip cực nhiều (+50%)
+                        case CustomerType.FoodCritic: multiplier *= 1.2f; break;
+                        default: multiplier *= 1.15f; break;
+                    }
+                }
+                else
+                {
+                    // Muốn cửa sổ nhưng ngồi bàn thường -> Bớt tip
+                    switch (profile?.type)
+                    {
+                        case CustomerType.Chill: multiplier *= 0.95f; break;
+                        case CustomerType.RichAndRush: multiplier *= 0.8f; break; // VIP bớt tip (-20%)
+                        case CustomerType.FoodCritic: multiplier *= 0.85f; break;
+                        default: multiplier *= 0.9f; break;
+                    }
+                }
+            }
+            else
+            {
+                multiplier *= gotWindow ? 1.12f : 1f;
+            }
         }
 
         multiplier *= Mathf.Lerp(0.9f, 1.15f, Mathf.Clamp01(PlayerData.hygieneScore / 10f));
@@ -961,6 +1134,74 @@ public class CustomerAI : MonoBehaviour
         {
             imgOrderIcon.sprite = previous;
         }
+    }
+
+    private void FollowPlayer()
+    {
+        if (_agent == null) return;
+        if (!_agent.enabled) _agent.enabled = true;
+        _agent.isStopped = false;
+        
+        _agent.stoppingDistance = 1.5f;
+
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            _agent.SetDestination(player.transform.position);
+        }
+    }
+
+    public void ReturnToQueue()
+    {
+        if (_agent != null)
+        {
+            _agent.stoppingDistance = 0f;
+            if (!_agent.enabled) _agent.enabled = true;
+            _agent.isStopped = false;
+            
+            Transform spawnTrans = FindSpawnPointTransform();
+            if (spawnTrans != null)
+            {
+                _agent.SetDestination(spawnTrans.position);
+            }
+        }
+    }
+
+    private void EnsureWindowSeatUI()
+    {
+        if (_windowSeatText != null) return;
+
+        Transform statusCanvasTrans = transform.Find("StatusCanvas");
+        if (statusCanvasTrans == null) return;
+
+        GameObject txtGo = new GameObject("txt_WindowSeatDemand", typeof(RectTransform), typeof(CanvasRenderer), typeof(TMPro.TextMeshProUGUI));
+        txtGo.transform.SetParent(statusCanvasTrans, false);
+
+        RectTransform rect = txtGo.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(0f, 150f);
+        rect.sizeDelta = new Vector2(500f, 80f);
+        rect.localScale = Vector3.one;
+
+        TMPro.TextMeshProUGUI tmp = txtGo.GetComponent<TMPro.TextMeshProUGUI>();
+        tmp.font = GetFallbackFont();
+        tmp.fontSize = 28f;
+        tmp.color = new Color(0.2f, 0.9f, 1f, 1f); // Cyan
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.text = "Muốn ngồi gần cửa sổ";
+        tmp.raycastTarget = false;
+
+        tmp.outlineColor = Color.black;
+        tmp.outlineWidth = 0.2f;
+
+        _windowSeatText = tmp;
+    }
+
+    private TMPro.TMP_FontAsset GetFallbackFont()
+    {
+        if (TMPro.TMP_Settings.defaultFontAsset != null) return TMPro.TMP_Settings.defaultFontAsset;
+        TMPro.TextMeshProUGUI anyText = FindObjectOfType<TMPro.TextMeshProUGUI>(true);
+        if (anyText != null && anyText.font != null) return anyText.font;
+        return null;
     }
     #endregion
 

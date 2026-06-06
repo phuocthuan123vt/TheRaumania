@@ -7,12 +7,57 @@ public class LevelManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
     }
+    [Header("Dẫn khách")]
+    public CustomerAI currentLedCustomer;
+
     public void OnPlayerInteractWithCustomer(CustomerAI customer)
     {
         switch (customer.currentState)
         {
             case CustomerAI.CustomerState.Queueing:
-                HandleLeadToTable(customer);
+                if (currentLedCustomer != null)
+                {
+                    Debug.Log("Bạn đang dẫn một khách hàng khác rồi!");
+                }
+                else
+                {
+                    currentLedCustomer = customer;
+                    customer.currentState = CustomerAI.CustomerState.BeingLed;
+
+                    Interactable customerInteractable = customer.GetComponent<Interactable>();
+                    if (customerInteractable != null)
+                    {
+                        customerInteractable.interactMessage = "Nhấn E để hủy dẫn";
+                    }
+
+                    Debug.Log("Khách hàng bắt đầu đi theo bạn. Hãy dẫn họ đến bàn trống và nhấn E.");
+                }
+                break;
+
+            case CustomerAI.CustomerState.BeingLed:
+                if (currentLedCustomer == customer)
+                {
+                    GameObject player = GameObject.FindWithTag("Player");
+                    Table nearbyTable = (player != null) ? FindNearbyTable(player.transform.position, 2.2f) : null;
+                    if (nearbyTable != null)
+                    {
+                        OnPlayerInteractWithTable(nearbyTable);
+                    }
+                    else
+                    {
+                        currentLedCustomer = null;
+                        customer.currentState = CustomerAI.CustomerState.Queueing;
+
+                        Interactable customerInteractable = customer.GetComponent<Interactable>();
+                        if (customerInteractable != null)
+                        {
+                            customerInteractable.interactMessage = "Nhấn E để tương tác";
+                        }
+
+                        customer.ReturnToQueue();
+                        Debug.Log("Đã hủy dẫn khách hàng này.");
+                    }
+                }
                 break;
 
             case CustomerAI.CustomerState.Ordering:
@@ -52,41 +97,68 @@ public class LevelManager : MonoBehaviour
                     Debug.Log("Tay trắng không có món gì để đưa!");
                 }
                 break;
+
             case CustomerAI.CustomerState.CheckingOut:
                 customer.ReceivePaymentByPlayer();
                 Debug.Log("Alex đã nhận thanh toán của khách!");
                 break;
         }
     }
-    private void HandleLeadToTable(CustomerAI customer)
+
+    public void OnPlayerInteractWithTable(Table table)
     {
-        Table[] allTables = FindObjectsOfType<Table>();
-
-        Debug.Log($"LevelManager: Found {allTables.Length} tables in scene.");
-
-        foreach (var t in allTables)
+        if (currentLedCustomer == null)
         {
-            if (t == null)
+            Debug.Log("Bạn chưa dẫn khách hàng nào cả!");
+            return;
+        }
+
+        // Tìm ghế trống
+        int freeSeatIndex = -1;
+        for (int i = 0; i < table.seats.Length; i++)
+        {
+            if (!table.seats[i].isOccupied)
             {
-                Debug.LogWarning("LevelManager: encountered null Table reference.");
-                continue;
-            }
-            int seatCount = t.seats != null ? t.seats.Length : 0;
-            Debug.Log($"LevelManager: Table '{t.name}' has {seatCount} seats. isNearWindow={t.isNearWindow}");
-            if (t.seats == null) continue;
-            for (int i = 0; i < t.seats.Length; i++)
-            {
-                var s = t.seats[i];
-                Debug.Log($" LevelManager: Table '{t.name}' seat[{i}] isOccupied={s.isOccupied} point={(s.point!=null ? s.point.name : "null")} leavePoint={(s.leavePoint!=null ? s.leavePoint.name : "null")} sitDir={s.sitDirection}");
-                if (!s.isOccupied)
-                {
-                    s.isOccupied = true;
-                    Debug.Log($"LevelManager: Assigning customer to Table '{t.name}' seat[{i}].");
-                    customer.LeadToSeat(t, i);
-                    return;
-                }
+                freeSeatIndex = i;
+                break;
             }
         }
-        Debug.Log("Không còn cái ghế nào trống cả!");
+
+        if (freeSeatIndex == -1)
+        {
+            Debug.Log("Bàn này đã đầy chỗ!");
+            return;
+        }
+
+        // Xếp khách vào bàn
+        CustomerAI customer = currentLedCustomer;
+        currentLedCustomer = null;
+
+        Interactable customerInteractable = customer.GetComponent<Interactable>();
+        if (customerInteractable != null)
+        {
+            customerInteractable.interactMessage = "Nhấn E để tương tác";
+        }
+
+        customer.LeadToSeat(table, freeSeatIndex);
+        Debug.Log($"Đã xếp khách {customer.name} vào bàn {table.name}, ghế {freeSeatIndex}.");
+    }
+
+    private Table FindNearbyTable(Vector3 position, float range)
+    {
+        Table[] allTables = FindObjectsOfType<Table>();
+        Table nearest = null;
+        float minDist = range;
+        foreach (var t in allTables)
+        {
+            if (t == null) continue;
+            float dist = Vector3.Distance(position, t.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = t;
+            }
+        }
+        return nearest;
     }
 }

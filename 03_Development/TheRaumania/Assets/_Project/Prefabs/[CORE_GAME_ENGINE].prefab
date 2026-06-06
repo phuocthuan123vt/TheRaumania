@@ -3592,6 +3592,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1673964912773287274, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1679337992410476954, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3631,6 +3635,10 @@ PrefabInstance:
     - target: {fileID: 1808358695949750877, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
       propertyPath: m_SizeDelta.y
       value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 1884985239445143814, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1927147443885124810, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
       propertyPath: m_AnchorMax.x
@@ -3804,6 +3812,10 @@ PrefabInstance:
       propertyPath: allRecipes.Array.data[4]
       value: 
       objectReference: {fileID: 11400000, guid: 6a2a2004100802a45b919e7104d8f2e3, type: 2}
+    - target: {fileID: 3812522148951469527, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4310717158492171906, guid: f09f284c0ad0649468a3d275e8b16439, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0.00027243336
@@ -4231,6 +4243,10 @@ PrefabInstance:
     - target: {fileID: 5679084664621240537, guid: cf9d44c12ee9f5f42a9543eb6a9c423e, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5679084664621240537, guid: cf9d44c12ee9f5f42a9543eb6a9c423e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8088026640108161438, guid: cf9d44c12ee9f5f42a9543eb6a9c423e, type: 3}
       propertyPath: _moveSpeed
@@ -4718,6 +4734,10 @@ PrefabInstance:
     - target: {fileID: 8391931248089243424, guid: b3dcfe4caedd9c843a5df5e3373e1a85, type: 3}
       propertyPath: m_Name
       value: Main Camera
+      objectReference: {fileID: 0}
+    - target: {fileID: 8391931248089243424, guid: b3dcfe4caedd9c843a5df5e3373e1a85, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

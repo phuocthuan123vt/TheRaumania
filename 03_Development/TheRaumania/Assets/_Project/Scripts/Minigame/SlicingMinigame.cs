@@ -23,12 +23,18 @@ public class SlicingMinigame : MinigameBase
         _totalSlices = Random.Range(4, 7); 
         _currentSliceCount = 0;
         _sliceScores.Clear();
-        // Fresh ingredients should still be faster than the current implementation,
-        // but remain slower than lower-freshness ingredients.
+
+        if (_defaultBaseSpeed <= 0f)
+        {
+            _defaultBaseSpeed = 2.5f;
+        }
+
+        // Tốc độ tỉ lệ nghịch với độ tươi: tươi hơn -> chậm hơn, ít tươi -> nhanh hơn
         float freshness01 = Mathf.Clamp01(freshness / 100f);
-        float lowFreshnessSpeed = _defaultBaseSpeed * 3.2f;
-        float highFreshnessSpeed = _defaultBaseSpeed * 1.8f;
+        float lowFreshnessSpeed = _defaultBaseSpeed * 1.0f;   // Độ tươi 0%: tốc độ nhanh vừa phải (2.5)
+        float highFreshnessSpeed = _defaultBaseSpeed * 0.4f;  // Độ tươi 100%: tốc độ chậm rãi (1.0)
         baseSpeed = Mathf.Lerp(lowFreshnessSpeed, highFreshnessSpeed, freshness01);
+
         StartNextSlice();
     }
     void StartNextSlice()
