@@ -3,7 +3,11 @@ guid: 6e0d558d2f689e14eaad88271f62d8b1
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - spawnPoint: {instanceID: 0}
+  - normalCustomerPrefab: {fileID: 6691974567820988535, guid: 840b76dc02895a74c87cc25eccb11cfe, type: 3}
+  - vipCustomerPrefab: {fileID: 6691974567820988535, guid: 7fbe949295a2b7242aa71e161d0c5e1c, type: 3}
+  - criticCustomerPrefab: {fileID: 6691974567820988535, guid: 276f8d4f78512a54bb87738227eaa666, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
