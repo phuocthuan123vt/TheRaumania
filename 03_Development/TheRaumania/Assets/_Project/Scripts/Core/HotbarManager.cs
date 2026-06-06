@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class HotbarManager : MonoBehaviour
 {
@@ -80,7 +81,75 @@ public class HotbarManager : MonoBehaviour
 
             string names = string.Join(", ", uiSlots.Select(s => s != null ? s.gameObject.name : "null"));
             Debug.Log($"HotbarManager: auto-mapped {uiSlots.Length} ui slots from scene: {names}");
+            // Ensure each slot has a selected highlight assigned (auto-search or create)
+            for (int i = 0; i < uiSlots.Length; i++)
+            {
+                EnsureSlotHasHighlight(uiSlots[i]);
+            }
         }
+    }
+
+    private void EnsureSlotHasHighlight(HotbarSlotUI slot)
+    {
+        if (slot == null) return;
+
+        if (slot.selectedHighlight != null) return;
+
+        // common child names to search for
+        string[] candidates = new string[] { "selectedHighlight", "SelectedHighlight", "selected_outline", "selectedOutline", "img_SelectedOutline", "selected" };
+
+        foreach (var name in candidates)
+        {
+            var t = slot.transform.Find(name);
+            if (t != null)
+            {
+                slot.selectedHighlight = t.gameObject;
+                slot.selectedHighlight.SetActive(false);
+                return;
+            }
+        }
+
+        // fallback: create explicit 1px-style border images so the outline is always visible
+        GameObject hl = new GameObject("selectedHighlight", typeof(RectTransform));
+        hl.transform.SetParent(slot.transform, false);
+        var rt = hl.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        // create 4 border edges
+        Color borderCol = new Color(1f, 0.85f, 0f, 0.95f);
+        float thickness = 8f; // pixels (doubled)
+
+        void MakeEdge(string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+        {
+            GameObject edge = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            edge.transform.SetParent(hl.transform, false);
+            var ert = edge.GetComponent<RectTransform>();
+            ert.anchorMin = anchorMin;
+            ert.anchorMax = anchorMax;
+            ert.offsetMin = offsetMin;
+            ert.offsetMax = offsetMax;
+            var eimg = edge.GetComponent<Image>();
+            eimg.color = borderCol;
+            eimg.raycastTarget = false;
+        }
+
+        // Top
+        MakeEdge("edge_top", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -thickness), new Vector2(0f, 0f));
+        // Bottom
+        MakeEdge("edge_bottom", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(0f, thickness));
+        // Left
+        MakeEdge("edge_left", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(thickness, 0f));
+        // Right
+        MakeEdge("edge_right", new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(-thickness, 0f), new Vector2(0f, 0f));
+
+        // ensure visible on top
+        hl.transform.SetAsLastSibling();
+        slot.selectedHighlight = hl;
+        slot.selectedHighlight.SetActive(false);
+        Debug.Log($"HotbarManager: Created border highlight for slot '{slot.gameObject.name}'");
     }
 
     private void Start() { AutoMapUISlotsIfNeeded(); RefreshUI(); }
@@ -100,6 +169,32 @@ public class HotbarManager : MonoBehaviour
         {
             SelectSlot(9);
         }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            RemoveSelectedSlotItem();
+        }
+    }
+
+    public void RemoveSelectedSlotItem()
+    {
+        if (items == null || items.Count == 0)
+        {
+            return;
+        }
+
+        if (SelectedSlotIndex < 0 || SelectedSlotIndex >= items.Count)
+        {
+            return;
+        }
+
+        items.RemoveAt(SelectedSlotIndex);
+        if (SelectedSlotIndex >= items.Count)
+        {
+            SelectedSlotIndex = Mathf.Max(0, items.Count - 1);
+        }
+
+        RefreshUI();
     }
 
     public void SelectSlot(int index)
@@ -160,12 +255,25 @@ public class HotbarManager : MonoBehaviour
             return;
         }
 
+        if (items == null)
+        {
+            items = new List<StoredItem>();
+        }
+
         for (int i = 0; i < uiSlots.Length; i++)
         {
-            if (i < items.Count && items[i] != null)
+            if (uiSlots[i] == null) continue;
+
+            if (i < items.Count && items[i] != null && items[i].itemData != null)
+            {
                 uiSlots[i].Setup(items[i]);
+            }
             else
+            {
                 uiSlots[i].Clear();
+            }
+            // Toggle selected visual
+            uiSlots[i].SetSelected(i == SelectedSlotIndex);
         }
     }
 
@@ -182,6 +290,6 @@ public class HotbarManager : MonoBehaviour
 
     private void OnValidate()
     {
-        if (Instance != null) RefreshUI();
+        if (Instance != null && Application.isPlaying) RefreshUI();
     }
 }

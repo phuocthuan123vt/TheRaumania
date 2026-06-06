@@ -34,6 +34,7 @@ public class CustomerAI : MonoBehaviour
     private bool _hasReceivedFood = false;
     private bool _isDoneEating = false;
     private bool _paymentProcessed = false;
+    private float _moodReactionCooldown = 0f;
     public bool isPaid = false;
 
     private Node _rootNode;
@@ -49,6 +50,7 @@ public class CustomerAI : MonoBehaviour
     public Sprite emoteWave;
     public Sprite emotePay;
     public Sprite emoteEat;
+    public Sprite emoteNauseous;
 
     public int _mySeatIndex;
 
@@ -239,13 +241,13 @@ public class CustomerAI : MonoBehaviour
     private void Update()
     {
         UpdateVisuals();
+        UpdateContextualReactions();
 
         if (_isPatienceActive && currentState != CustomerState.Leaving)
         {
             _rootNode?.Evaluate();
         }
     }
-
     #region AI Logic Flow
 
     public void OnInteractCalled()
@@ -267,9 +269,25 @@ public class CustomerAI : MonoBehaviour
         assignedTable.seats[_mySeatIndex].isOccupied = true;
         _targetSitX = assignedTable.seats[_mySeatIndex].sitDirection;
 
+        // Ensure NPC switches to walking state so the behavior tree detects arrival
         currentState = CustomerState.WalkingToTable;
-        _agent.enabled = true;
-        _agent.SetDestination(assignedTable.seats[_mySeatIndex].point.position);
+        _isPatienceActive = true;
+
+        // small safety: un-stop agent and enable it before setting destination
+        if (_agent != null)
+        {
+            _agent.enabled = true;
+            _agent.isStopped = false;
+            _agent.ResetPath();
+            if (assignedTable.seats[_mySeatIndex].point != null)
+            {
+                _agent.SetDestination(assignedTable.seats[_mySeatIndex].point.position);
+            }
+            else
+            {
+                Debug.LogWarning($"CustomerAI.LeadToSeat: seat point is null for table {table?.name} seat {seatIndex}");
+            }
+        }
     }
 
     void OnArrivedAtTable()
@@ -283,6 +301,8 @@ public class CustomerAI : MonoBehaviour
         _anim.SetBool("IsSitting", true);
         _anim.SetBool("IsMoving", false);
         _anim.SetFloat("SitX", _targetSitX);
+
+        ApplySeatComfortBonus();
 
         RecipeBookUI recipeBook = FindObjectOfType<RecipeBookUI>(true);
         if (recipeBook != null && recipeBook.allRecipes != null && recipeBook.allRecipes.Count > 0)
@@ -312,6 +332,14 @@ public class CustomerAI : MonoBehaviour
             _hasOrdered = true;
             currentState = CustomerState.WaitingForFood;
             Debug.Log("Da nhan order. Khach dang doi mon.");
+            // Ensure the order bubble shows the requested dish (override any emote)
+            if (orderBubble != null && imgOrderIcon != null && wantedRecipe != null)
+            {
+                orderBubble.SetActive(true);
+                imgOrderIcon.sprite = wantedRecipe.dishIcon;
+                // prevent immediate mood reactions from overwriting the order icon
+                _moodReactionCooldown = 2.5f;
+            }
         }
     }
 
@@ -325,10 +353,22 @@ public class CustomerAI : MonoBehaviour
             _dishStars = stars;
             currentState = CustomerState.Eating;
             isPaid = false;
-            currentPatience = 100f;
+            currentPatience = Mathf.Clamp(currentPatience + GetFoodSatisfactionPatienceBonus(), 0f, 100f);
 
             if (emoteEat != null) ShowEmote(emoteEat);
             Debug.Log($"Khach nhan mon: {dish.itemName} ({stars:F1} sao)");
+
+            // Chance to show a nausea emote when the dish is very poor (< 2 stars)
+            if (emoteNauseous != null && _dishStars < 2f)
+            {
+                float nauseaRoll = Random.value;
+                float nauseaChance = Random.Range(0.2f, 0.3f);
+                if (nauseaRoll <= nauseaChance)
+                {
+                    float dur = Random.Range(1f, 2f);
+                    StartCoroutine(ShowTemporaryEmoteCoroutine(emoteNauseous, dur));
+                }
+            }
 
             StartCoroutine(EatRoutine());
         }
@@ -349,84 +389,13 @@ public class CustomerAI : MonoBehaviour
             ProcessPayment();
         }
         isPaid = true;
-        StartLeaveFromTable();
+        ShowEmote(emoteHappy);
+        OnLeave();
     }
 
     private void StartLeaveFromTable()
     {
-        if (currentState == CustomerState.Leaving) return;
-
-        currentState = CustomerState.Leaving;
-        _isPatienceActive = false;
-
-        if (_anim != null)
-        {
-            _anim.SetBool("IsSitting", false);
-            _anim.SetBool("IsMoving", true);
-            _anim.CrossFade("Movement", 0.05f);
-        }
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(transform.position, out hit, 2.0f, NavMesh.AllAreas))
-        {
-            transform.position = hit.position;
-        }
-
-        _agent.enabled = true;
-        _agent.isStopped = false;
-
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.simulated = true;
-            rb.gravityScale = 0f;
-            rb.velocity = Vector2.zero;
-        }
-
-        Vector3 standPoint = FindLeaveStandPoint();
-        if (standPoint != Vector3.zero)
-        {
-            transform.position = standPoint;
-        }
-
-        Vector3 finalDest = ResolveLeaveDestination();
-
-        if (!_agent.isOnNavMesh)
-        {
-            NavMeshHit agentHit;
-            if (NavMesh.SamplePosition(transform.position, out agentHit, 3.0f, NavMesh.AllAreas))
-            {
-                _agent.Warp(agentHit.position);
-            }
-        }
-
-        NavMeshHit destHit;
-        if (NavMesh.SamplePosition(finalDest, out destHit, 3.0f, NavMesh.AllAreas))
-        {
-            finalDest = destHit.position;
-        }
-
-        _agent.SetDestination(finalDest);
-        Debug.Log($"CustomerAI: leaving to SpawnPoint at {finalDest} | onNavMesh={_agent.isOnNavMesh} | pathStatus={_agent.pathStatus}");
-
-        if (_agent.pathStatus != NavMeshPathStatus.PathComplete)
-        {
-            Vector3 escapePoint = FindEscapePointTowards(finalDest);
-            if (escapePoint != Vector3.zero && Vector3.Distance(transform.position, escapePoint) > 0.05f)
-            {
-                StartCoroutine(LeaveThroughWaypoints(escapePoint, finalDest));
-            }
-            else
-            {
-                StartCoroutine(ForceMoveToSpawn(finalDest));
-            }
-        }
-        else
-        {
-            StartCoroutine(MonitorLeaveProgress(finalDest));
-        }
-
-        Destroy(gameObject, 8f);
+        OnLeave();
     }
 
     private Vector3 ResolveLeaveDestination()
@@ -714,7 +683,7 @@ public class CustomerAI : MonoBehaviour
         _paymentProcessed = true;
 
         int baseRC = (wantedRecipe != null && wantedRecipe.dishResultSO != null) ? wantedRecipe.dishResultSO.basePrice : 100;
-        float tip = (_dishStars * 10f) * profile.tipMultiplier;
+        float tip = (_dishStars * 10f) * profile.tipMultiplier * GetServiceTipMultiplier();
         PlayerData.AddCredit(Mathf.RoundToInt(baseRC + tip));
 
         Debug.Log($"Khach tra {baseRC + tip} RC va chuan bi Review.");
@@ -727,19 +696,21 @@ public class CustomerAI : MonoBehaviour
         float patienceScore = (Mathf.Max(0, currentPatience) / 100f) * 10f;
         float dishScore = Mathf.Clamp(_dishStars * 2f, 0f, 10f);
         float specialScore = isSpecialRequestMet ? 10f : 0f;
+        float hygieneScore = GetHygieneMoodScore();
+        float seatComfortScore = GetSeatComfortScore();
 
         float satisfaction = 0f;
 
         switch (profile.type)
         {
             case CustomerType.Chill:
-                satisfaction = (patienceScore * 0.25f) + (dishScore * 0.75f);
+                satisfaction = (patienceScore * 0.20f) + (dishScore * 0.55f) + (hygieneScore * 0.15f) + (seatComfortScore * 0.10f);
                 break;
             case CustomerType.RichAndRush:
-                satisfaction = (patienceScore * 0.15f) + (dishScore * 0.65f) + (specialScore * 0.20f);
+                satisfaction = (patienceScore * 0.10f) + (dishScore * 0.55f) + (specialScore * 0.15f) + (hygieneScore * 0.10f) + (seatComfortScore * 0.10f);
                 break;
             case CustomerType.FoodCritic:
-                satisfaction = (patienceScore * 0.10f) + (dishScore * 0.75f) + (specialScore * 0.15f);
+                satisfaction = (patienceScore * 0.10f) + (dishScore * 0.55f) + (specialScore * 0.15f) + (hygieneScore * 0.15f) + (seatComfortScore * 0.05f);
                 break;
         }
 
@@ -824,12 +795,171 @@ public class CustomerAI : MonoBehaviour
         Destroy(gameObject, 8f);
     }
 
+    private void UpdateContextualReactions()
+    {
+        if (!_isPatienceActive || currentState == CustomerState.Leaving)
+        {
+            return;
+        }
+
+        _moodReactionCooldown -= Time.deltaTime;
+        if (_moodReactionCooldown > 0f)
+        {
+            return;
+        }
+
+        bool waitingForService = currentState == CustomerState.Ordering || currentState == CustomerState.WaitingForFood || currentState == CustomerState.CheckingOut;
+        if (!waitingForService)
+        {
+            return;
+        }
+
+        float patiencePressure = Mathf.Clamp01((60f - currentPatience) / 60f);
+        float hygienePressure = Mathf.Clamp01((10f - PlayerData.hygieneScore) / 10f);
+        float chance = (profile != null ? profile.randomReactionChance : 0.04f) + (patiencePressure * 0.18f) + (hygienePressure * 0.22f);
+
+        if (assignedTable != null && assignedTable.isNearWindow)
+        {
+            chance *= 0.8f;
+        }
+
+        if (currentState == CustomerState.WaitingForFood && currentPatience < 50f && hasUpgrade_CallStaff && !_hasOrdered)
+        {
+            ShowEmote(emoteWave);
+            _moodReactionCooldown = 2.25f;
+            return;
+        }
+
+        // Nausea emote: while waiting for food and hygiene is low (<4), small chance to show nausea
+        if (currentState == CustomerState.WaitingForFood && PlayerData.hygieneScore < 4f && emoteNauseous != null)
+        {
+            float nauseaChance = Random.Range(0.2f, 0.3f);
+            if (Random.value <= nauseaChance)
+            {
+                float dur = Random.Range(1f, 2f);
+                StartCoroutine(ShowTemporaryEmoteCoroutine(emoteNauseous, dur));
+                _moodReactionCooldown = dur + 0.5f;
+                return;
+            }
+        }
+
+        if (Random.value <= chance)
+        {
+            if (hygienePressure > 0.5f)
+            {
+                ShowEmote(emoteAngry);
+            }
+            else if (currentState == CustomerState.CheckingOut)
+            {
+                ShowEmote(emotePay);
+            }
+            else if (_hasOrdered && currentState == CustomerState.WaitingForFood)
+            {
+                // preserve the order icon after ordering; skip showing wave
+                _moodReactionCooldown = Random.Range(2.5f, 5.5f);
+                return;
+            }
+            else
+            {
+                ShowEmote(emoteWave);
+            }
+
+            _moodReactionCooldown = Random.Range(2.5f, 5.5f);
+        }
+    }
+
+    private float GetPatienceDecayRate()
+    {
+        float baseRate = profile != null ? profile.patienceDecayRate : 1f;
+        float hygieneMultiplier = Mathf.Lerp(0.9f, 1.55f, Mathf.Clamp01((10f - PlayerData.hygieneScore) / 10f) * (profile != null ? profile.hygieneSensitivity : 1f));
+        float seatMultiplier = assignedTable != null && assignedTable.isNearWindow ? 0.9f : 1f;
+        return baseRate * hygieneMultiplier * seatMultiplier;
+    }
+
+    private void ApplySeatComfortBonus()
+    {
+        if (assignedTable == null)
+        {
+            return;
+        }
+
+        if (assignedTable.isNearWindow)
+        {
+            currentPatience = Mathf.Min(100f, currentPatience + 6f);
+        }
+        else
+        {
+            currentPatience = Mathf.Min(100f, currentPatience + 2f);
+        }
+    }
+
+    private float GetHygieneMoodScore()
+    {
+        float hygiene = Mathf.Clamp(PlayerData.hygieneScore, 0f, 10f);
+        float seatBonus = assignedTable != null && assignedTable.isNearWindow ? 1.0f : 0f;
+        return Mathf.Clamp(hygiene + seatBonus * (profile != null ? profile.windowSeatMoodBonus * 10f : 1f), 0f, 10f);
+    }
+
+    private float GetSeatComfortScore()
+    {
+        if (assignedTable == null)
+        {
+            return 5f;
+        }
+
+        float seatScore = assignedTable.isNearWindow ? 8.5f : 5.5f;
+        seatScore += Mathf.Clamp(_targetSitX, -1f, 1f) * 0.5f;
+        return Mathf.Clamp(seatScore, 0f, 10f);
+    }
+
+    private float GetFoodSatisfactionPatienceBonus()
+    {
+        float hygieneFactor = Mathf.Clamp01(PlayerData.hygieneScore / 10f);
+        float seatBonus = assignedTable != null && assignedTable.isNearWindow ? 4f : 1.5f;
+        return 8f + (hygieneFactor * 4f) + seatBonus;
+    }
+
+    private float GetServiceTipMultiplier()
+    {
+        float multiplier = 1f;
+        if (assignedTable != null && assignedTable.isNearWindow)
+        {
+            multiplier *= 1.12f;
+        }
+
+        multiplier *= Mathf.Lerp(0.9f, 1.15f, Mathf.Clamp01(PlayerData.hygieneScore / 10f));
+        return multiplier;
+    }
+
     public void ShowEmote(Sprite emoteSprite)
     {
         if (orderBubble != null && imgOrderIcon != null && emoteSprite != null)
         {
             orderBubble.SetActive(true);
             imgOrderIcon.sprite = emoteSprite;
+        }
+    }
+
+    public IEnumerator ShowTemporaryEmoteCoroutine(Sprite emoteSprite, float duration)
+    {
+        if (orderBubble == null || imgOrderIcon == null || emoteSprite == null) yield break;
+
+        Sprite previous = imgOrderIcon.sprite;
+        orderBubble.SetActive(true);
+        imgOrderIcon.sprite = emoteSprite;
+
+        yield return new WaitForSeconds(duration);
+
+        if (orderBubble == null || imgOrderIcon == null) yield break;
+
+        if (wantedRecipe != null && wantedRecipe.dishIcon != null)
+        {
+            orderBubble.SetActive(true);
+            imgOrderIcon.sprite = wantedRecipe.dishIcon;
+        }
+        else
+        {
+            imgOrderIcon.sprite = previous;
         }
     }
     #endregion

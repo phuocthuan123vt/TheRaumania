@@ -11,6 +11,12 @@ public class ScenePortal : MonoBehaviour
     {
         if (!collision.CompareTag("Player")) return;
 
+        // Persist the current gameplay state into slot 0 before changing scenes.
+        if (GameplayManager.Instance != null)
+        {
+            GameplayManager.Instance.SaveTransientStateToSlot0();
+        }
+
         // Ghi nhớ tên điểm SpawnPoint trước khi load map
         PersistentGameManager.TargetSpawnPointName = spawnPointName;
 

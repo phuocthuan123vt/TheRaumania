@@ -62,13 +62,26 @@ public class LevelManager : MonoBehaviour
     {
         Table[] allTables = FindObjectsOfType<Table>();
 
+        Debug.Log($"LevelManager: Found {allTables.Length} tables in scene.");
+
         foreach (var t in allTables)
         {
+            if (t == null)
+            {
+                Debug.LogWarning("LevelManager: encountered null Table reference.");
+                continue;
+            }
+            int seatCount = t.seats != null ? t.seats.Length : 0;
+            Debug.Log($"LevelManager: Table '{t.name}' has {seatCount} seats. isNearWindow={t.isNearWindow}");
+            if (t.seats == null) continue;
             for (int i = 0; i < t.seats.Length; i++)
             {
-                if (!t.seats[i].isOccupied)
+                var s = t.seats[i];
+                Debug.Log($" LevelManager: Table '{t.name}' seat[{i}] isOccupied={s.isOccupied} point={(s.point!=null ? s.point.name : "null")} leavePoint={(s.leavePoint!=null ? s.leavePoint.name : "null")} sitDir={s.sitDirection}");
+                if (!s.isOccupied)
                 {
-                    t.seats[i].isOccupied = true;
+                    s.isOccupied = true;
+                    Debug.Log($"LevelManager: Assigning customer to Table '{t.name}' seat[{i}].");
                     customer.LeadToSeat(t, i);
                     return;
                 }

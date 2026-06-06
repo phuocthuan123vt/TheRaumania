@@ -215,6 +215,11 @@ public class UpgradeManager : MonoBehaviour
         data.upgradeCurrentPrices = new List<int>(upgradeCurrentPrices);
         data.upgradeBargainAllowed = new List<bool>(upgradeBargainAllowed);
         SaveSystem.Save(0, data);
+
+        if (RestaurantRatingManager.Instance != null)
+        {
+            RestaurantRatingManager.Instance.RefreshRating();
+        }
     }
 
     // Helper for restoring from save
