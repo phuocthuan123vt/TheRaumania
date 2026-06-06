@@ -1,0 +1,1632 @@
+fileFormatVersion: 2
+guid: b2ce39e96f26464499c53a8446f56a70
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cabinets_LRK_0
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 341
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b287a41b423198d4d807fd95ed9ddc62
+      internalID: -1501456700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_1
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 341
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 867a8bddbdfa8e44290b76773a24d5a1
+      internalID: -1646453758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 341
+        width: 16
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f524d40e752b2754fb0e9cdffa0fe44e
+      internalID: -2087826400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_3
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 341
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: baae8f45048ba9b4198a17d28b217acf
+      internalID: -526257742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 341
+        width: 16
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b6807a104fdb194ea83b8ba7af28978
+      internalID: -377225436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_5
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 341
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10338136bdda1db44bb1a37454f2acdf
+      internalID: -1199956825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_6
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 341
+        width: 16
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 390d740988dff6540864d7ecfb7bcc83
+      internalID: 1471449576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_7
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 341
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 470bce66bebb6ed439f0c2ffeb1c03ab
+      internalID: 2123121454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_8
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 341
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b21765e3bedaec741b84f6e93ae65764
+      internalID: 1797078562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_9
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 348
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9810ec89e94641d458bcafd4e354bf95
+      internalID: 1403149788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_10
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 341
+        width: 16
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 382f9de79f8289b4db9a9776fe1c26fa
+      internalID: -582206256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_11
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 348
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 210a4f3d28a3f0248a6699de21fb9802
+      internalID: 1268300914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_12
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 359
+        width: 48
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e70e6aa83ebaca34eae881269b691abc
+      internalID: -725820390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_13
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 277
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2fda18163ba95924281d49d2bb93ca67
+      internalID: -1567966656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_14
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 277
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec8ed852d7b0afd44bdce039407346c5
+      internalID: -1589758213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_15
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 277
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 365f74f729d53e34a86e6b720a8baaf6
+      internalID: 1018071679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_16
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 277
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a437d82d4622579479be0626ab1f24d5
+      internalID: 1459228831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_17
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 277
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2fedd5e7843ac604db4e7dfa3024620c
+      internalID: 557271544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_18
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 277
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01c7371e54ac28a43be271416d0bfea0
+      internalID: 1503871724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_19
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 277
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 694b10150fed59542a709f2f89eb0064
+      internalID: -1744520900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_20
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 277
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4f6d7fc38d264f4c809d0022631efde
+      internalID: -720564559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_21
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 284
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 762dd30608da84249b43d2013f2185d4
+      internalID: -228998915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_22
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 284
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81500e2e9c91d5241be65cf7acfe1e59
+      internalID: -768667818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_23
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 213
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a5550878d6bc97649b52a76be4a04dfa
+      internalID: -1470154228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_24
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 213
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 222442629ec44cd499f548cd07a7e9e3
+      internalID: 1722642982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_25
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 213
+        width: 16
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43c40ecdd7ec46445b822365d391e20c
+      internalID: 1884544333
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_26
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 213
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edccd4420bd7ffb49a96df8cbe73679a
+      internalID: -1383900288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_27
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 213
+        width: 16
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce96c12417766014cbf208a214da8be7
+      internalID: 78612944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_28
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 213
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8c5dca229c6587428cf5df697ecc43a
+      internalID: -1097262138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_29
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 213
+        width: 16
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b946ae4e2963f404c87fbd948d8fe7f3
+      internalID: -1561987975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_30
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 213
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 23cc7c8222fa3d74787a018d586d3ced
+      internalID: 1980882630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_31
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 213
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4c1eaf3bfe65e874eb78aef98e291414
+      internalID: 861110405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_32
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 220
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a1d1514d5c5fbe419f36ee975139b5c
+      internalID: -1211054300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_33
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 213
+        width: 16
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 565b912b23a6c2e4cba2856ed2b8cb16
+      internalID: 389796706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_34
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 220
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3d01d416258eff4ea952e1ebf83d734
+      internalID: -1707035091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_35
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 231
+        width: 48
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ab3d9f83531302469bd32f2afa62aca
+      internalID: 969481802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_36
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 149
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e740e5243f77e944d9411d7fe08c8430
+      internalID: -1071908846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_37
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 149
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fad0aeddf461c454fb446ac27cf5f7a5
+      internalID: -221884704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_38
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 149
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70b9dad3c77a29543913de41e6be45dd
+      internalID: 1449082150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_39
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 149
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06c14240b78b4fb41be50d2778ec71b3
+      internalID: 140132753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_40
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 149
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dcb94c579bc162b46af514bc37a0bcc2
+      internalID: -1766659251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_41
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 149
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9b3fcdde5a3a8b4b9b1553866bda418
+      internalID: -360981919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_42
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 149
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e243ca3ef110e88409b0e7dac6146959
+      internalID: 2061383309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_43
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 149
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eee0ccb37bb0ebc40bb986413525c9a0
+      internalID: -1409265494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_44
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 156
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1a4710cf5cd5ee42b2169a56adc9851
+      internalID: -753444982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_45
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 156
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fead85243837e644ab84e6651e6dda7
+      internalID: -382524462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_46
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 85
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4c6792f87eb925d4b80170828b4267c8
+      internalID: 149025140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_47
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 85
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aecd502c865545b4ca277f1f409809d8
+      internalID: -789046830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_48
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 85
+        width: 16
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0144c9b134f81304dbbd7cb7ae548bb9
+      internalID: 1685867048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_49
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 85
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af4a1af8c9bb8934f930f2ea70210c3d
+      internalID: 855565746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_50
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 85
+        width: 16
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81dc4b10c744e014b9dd5cdd9ff1bcff
+      internalID: 258731866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_51
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 85
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71d1a775b5412de4b917c1aed22a61d7
+      internalID: 2142892034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_52
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 85
+        width: 16
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4c8076cf545e664e81faeb90ea274a8
+      internalID: -499746928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_53
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 85
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75ae029222f098e4a909f42ced8d6925
+      internalID: 446667325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_54
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 85
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae10bf72b59568c40a7382d86bc659c4
+      internalID: -105988425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_55
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 92
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d66dbdda5c741e458a8c8a59962f5ac
+      internalID: -1574657790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_56
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 85
+        width: 16
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75208c402fbef054ab1c839499d7d320
+      internalID: -621111958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_57
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 92
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24d957365104f6541a31547341bb69d3
+      internalID: 1552089518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_58
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 103
+        width: 48
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d033bbf56ce57174aa90231004bca7f4
+      internalID: 698688693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_59
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 21
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95c302f123e1a9c4a8244abec7f05962
+      internalID: 1853690161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_60
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 21
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa79745e8e5316d4ca3f8ae336239469
+      internalID: 1341416181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_61
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 21
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: baeef3afc7c99ad4690c26c84d10026c
+      internalID: 1103163385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_62
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 21
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e7474f7ad9562e4ba18dacc099c3420
+      internalID: -1165503725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_63
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 21
+        width: 48
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7971be2d134e2784d87f4bd02489c71c
+      internalID: 1435982737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_64
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 21
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d219c52eb9795f14a8faa3343563deac
+      internalID: 2028715379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_65
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 21
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b69087d3b1bf79046bdaead631835788
+      internalID: -745324615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_66
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 21
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ae11a27500f49e4ab6b4f0bc3dc5757
+      internalID: -1912651189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_67
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 28
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70a8d4b0b525a2848ab21798f3f5efc6
+      internalID: -1512872393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cabinets_LRK_68
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 28
+        width: 48
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a5f967b75c57e948bc9a6aa1e307cd3
+      internalID: 824135835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      cabinets_LRK_0: -1501456700
+      cabinets_LRK_1: -1646453758
+      cabinets_LRK_10: -582206256
+      cabinets_LRK_11: 1268300914
+      cabinets_LRK_12: -725820390
+      cabinets_LRK_13: -1567966656
+      cabinets_LRK_14: -1589758213
+      cabinets_LRK_15: 1018071679
+      cabinets_LRK_16: 1459228831
+      cabinets_LRK_17: 557271544
+      cabinets_LRK_18: 1503871724
+      cabinets_LRK_19: -1744520900
+      cabinets_LRK_2: -2087826400
+      cabinets_LRK_20: -720564559
+      cabinets_LRK_21: -228998915
+      cabinets_LRK_22: -768667818
+      cabinets_LRK_23: -1470154228
+      cabinets_LRK_24: 1722642982
+      cabinets_LRK_25: 1884544333
+      cabinets_LRK_26: -1383900288
+      cabinets_LRK_27: 78612944
+      cabinets_LRK_28: -1097262138
+      cabinets_LRK_29: -1561987975
+      cabinets_LRK_3: -526257742
+      cabinets_LRK_30: 1980882630
+      cabinets_LRK_31: 861110405
+      cabinets_LRK_32: -1211054300
+      cabinets_LRK_33: 389796706
+      cabinets_LRK_34: -1707035091
+      cabinets_LRK_35: 969481802
+      cabinets_LRK_36: -1071908846
+      cabinets_LRK_37: -221884704
+      cabinets_LRK_38: 1449082150
+      cabinets_LRK_39: 140132753
+      cabinets_LRK_4: -377225436
+      cabinets_LRK_40: -1766659251
+      cabinets_LRK_41: -360981919
+      cabinets_LRK_42: 2061383309
+      cabinets_LRK_43: -1409265494
+      cabinets_LRK_44: -753444982
+      cabinets_LRK_45: -382524462
+      cabinets_LRK_46: 149025140
+      cabinets_LRK_47: -789046830
+      cabinets_LRK_48: 1685867048
+      cabinets_LRK_49: 855565746
+      cabinets_LRK_5: -1199956825
+      cabinets_LRK_50: 258731866
+      cabinets_LRK_51: 2142892034
+      cabinets_LRK_52: -499746928
+      cabinets_LRK_53: 446667325
+      cabinets_LRK_54: -105988425
+      cabinets_LRK_55: -1574657790
+      cabinets_LRK_56: -621111958
+      cabinets_LRK_57: 1552089518
+      cabinets_LRK_58: 698688693
+      cabinets_LRK_59: 1853690161
+      cabinets_LRK_6: 1471449576
+      cabinets_LRK_60: 1341416181
+      cabinets_LRK_61: 1103163385
+      cabinets_LRK_62: -1165503725
+      cabinets_LRK_63: 1435982737
+      cabinets_LRK_64: 2028715379
+      cabinets_LRK_65: -745324615
+      cabinets_LRK_66: -1912651189
+      cabinets_LRK_67: -1512872393
+      cabinets_LRK_68: 824135835
+      cabinets_LRK_7: 2123121454
+      cabinets_LRK_8: 1797078562
+      cabinets_LRK_9: 1403149788
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 public class PlayerInventory : MonoBehaviour
@@ -18,7 +18,7 @@ public class PlayerInventory : MonoBehaviour
             if (existingItem.quantity < 999)
             {
                 existingItem.quantity++;
-                existingItem.currentFreshness = (existingItem.currentFreshness + item.currentFreshness) / 2f;
+                existingItem.currentFreshness = Mathf.Max(existingItem.currentFreshness, item.currentFreshness);
             }
         }
         else

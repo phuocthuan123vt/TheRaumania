@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,11 +6,12 @@ public class PlayerMovement : MonoBehaviour
 {
     #region Biến cấu hình
     [Header("Cài đặt di chuyển")]
-    [SerializeField] private float _moveSpeed = 5f;
-
+    [SerializeField][Min(0.1f)] private float _moveSpeed = 5f;
+    [SerializeField][Min(0.1f)] private float _defaultMoveSpeed = 5f;
     private Rigidbody2D _rb;
     private Vector2 _moveInput;
-    private PlayerInputActions _inputActions; // Tên class sinh ra ở Bước 2
+    private Vector2 _lastMoveDir = Vector2.down;
+    private PlayerInputActions _inputActions;
     private Animator _anim;
     #endregion
 
@@ -20,37 +21,79 @@ public class PlayerMovement : MonoBehaviour
         _inputActions = new PlayerInputActions();
         _inputActions.Player.Interact.performed += OnInteractPressed;
         _anim = GetComponentInChildren<Animator>();
+
+        // Defensive: prevent move speed from being zeroed by overrides/runtime
+        if (_moveSpeed <= 0f)
+        {
+            _moveSpeed = _defaultMoveSpeed > 0f ? _defaultMoveSpeed : 5f;
+            Debug.LogWarning("PlayerMovement: move speed was 0, restored default.");
+        }
     }
 
-    // Bật/Tắt bộ nhận phím bấm
     private void OnEnable() => _inputActions.Player.Enable();
     private void OnDisable() => _inputActions.Player.Disable();
 
     private void OnInteractPressed(InputAction.CallbackContext context)
     {
-        // Khi phím Interact được nhấn, gọi hàm tương tác của tất cả các đối tượng có thể tương tác trong phạm vi
-        Collider2D[] closeObjects = Physics2D.OverlapCircleAll(transform.position, 2f);
+        // Nếu Cheat Console đang mở thì không cho tương tác
+        if (CheatConsole.Instance != null && CheatConsole.Instance.IsConsoleOpen) return;
 
+        Collider2D[] closeObjects = Physics2D.OverlapCircleAll(transform.position, 2f);
+        var interactables = new List<Interactable>();
         foreach (var col in closeObjects)
         {
-            // Kiểm tra xem vật thể chạm phải có script Interactable không
-            if (col.TryGetComponent(out Interactable interactable))
+            if (col.TryGetComponent(out Interactable interactable)) interactables.Add(interactable);
+        }
+        if (interactables.Count == 0) return;
+
+        // Find minimum distance
+        float minDist = float.MaxValue;
+        foreach (var it in interactables)
+        {
+            float d = Vector2.Distance(transform.position, it.transform.position);
+            if (d < minDist) minDist = d;
+        }
+
+        // Candidates within threshold of nearest — prefer the one player is facing
+        const float threshold = 0.5f;
+        Interactable best = null;
+        float bestDot = -1f;
+        Vector2 facing = _lastMoveDir.sqrMagnitude > 0 ? _lastMoveDir.normalized : Vector2.down;
+        foreach (var it in interactables)
+        {
+            float d = Vector2.Distance(transform.position, it.transform.position);
+            if (d <= minDist + threshold)
             {
-                interactable.TriggerInteraction();
-                return; // Tương tác với cái đầu tiên tìm thấy rồi nghỉ, không chạy tiếp
+                Vector2 dir = ((Vector2)it.transform.position - (Vector2)transform.position).normalized;
+                float dot = Vector2.Dot(facing, dir);
+                if (dot > bestDot)
+                {
+                    bestDot = dot;
+                    best = it;
+                }
             }
         }
+        if (best == null) best = interactables[0];
+        best.TriggerInteraction(transform.position);
     }
 
     private void Update()
     {
-        // Đọc giá trị từ phím WASD (Trả về Vector2: X là ngang, Y là dọc)
+        // Kiểm tra xem người chơi có đang nhập lệnh không, nếu có thì chặn di chuyển
+        if (CheatConsole.Instance != null && CheatConsole.Instance.IsConsoleOpen)
+        {
+            _moveInput = Vector2.zero;
+            _anim.SetBool("IsMoving", false);
+            return;
+        }
+
         _moveInput = _inputActions.Player.Move.ReadValue<Vector2>();
         if (_moveInput != Vector2.zero)
         {
             _anim.SetFloat("MoveX", _moveInput.x);
             _anim.SetFloat("MoveY", _moveInput.y);
             _anim.SetBool("IsMoving", true);
+            _lastMoveDir = _moveInput.normalized;
         }
         else
         {
@@ -60,8 +103,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Tính toán vận tốc dựa trên Input và Speed
-        // Dùng FixedUpdate để di chuyển vật lý mượt mà, không bị giật
         _rb.velocity = _moveInput * _moveSpeed;
     }
 }

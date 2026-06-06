@@ -1,38 +1,247 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class HotbarManager : MonoBehaviour
 {
     public static HotbarManager Instance;
     public List<StoredItem> items = new List<StoredItem>();
     public HotbarSlotUI[] uiSlots; // Kéo 10 ô ở Hierarchy vào đây theo đúng thứ tự
+    
+    public int SelectedSlotIndex { get; private set; } = 0; // Thêm biến lưu vị trí đang chọn
 
-    private void Awake() { Instance = this; }
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            // Keep the hotbar manager across scenes to preserve items
+            DontDestroyOnLoad(this.transform.root.gameObject);
+        }
+        else if (Instance != this)
+        {
+            // Avoid duplicate instances overriding the singleton
+            Destroy(this);
+            return;
+        }
+    }
 
-    private void Start() { RefreshUI(); }
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Khi scene thay đổi có thể xuất hiện panel hotbar mới trong scene,
+        // thử remap lại UI slots và refresh UI để tránh NRE.
+        AutoMapUISlotsIfNeeded();
+        RefreshUI();
+    }
+
+    private void AutoMapUISlotsIfNeeded()
+    {
+        bool needsMapping = (uiSlots == null || uiSlots.Length == 0 || uiSlots.Any(s => s == null));
+        if (!needsMapping) return;
+
+        // Try to find the panel named "pnl_Hotbar" in scene (common in our prefabs)
+        GameObject panel = GameObject.Find("pnl_Hotbar");
+        HotbarSlotUI[] found = null;
+        if (panel != null)
+        {
+            found = panel.GetComponentsInChildren<HotbarSlotUI>(true);
+            // Order by sibling index under the panel to preserve slot order
+            found = found.OrderBy(h => h.transform.GetSiblingIndex()).ToArray();
+        }
+
+        // Fallback: find any HotbarSlotUI in scene
+        if (found == null || found.Length == 0)
+        {
+            found = GameObject.FindObjectsOfType<HotbarSlotUI>(true);
+            if (found != null && found.Length > 0)
+            {
+                // Try to order by hierarchy depth then sibling index to get consistent order
+                found = found.OrderBy(h => h.transform.GetSiblingIndex()).ToArray();
+            }
+        }
+
+        if (found != null && found.Length > 0)
+        {
+            // Ensure we only map up to 10 slots (hotbar has 10 slots)
+            int take = Mathf.Min(10, found.Length);
+            uiSlots = new HotbarSlotUI[take];
+            for (int i = 0; i < take; i++) uiSlots[i] = found[i];
+
+            string names = string.Join(", ", uiSlots.Select(s => s != null ? s.gameObject.name : "null"));
+            Debug.Log($"HotbarManager: auto-mapped {uiSlots.Length} ui slots from scene: {names}");
+            // Ensure each slot has a selected highlight assigned (auto-search or create)
+            for (int i = 0; i < uiSlots.Length; i++)
+            {
+                EnsureSlotHasHighlight(uiSlots[i]);
+            }
+        }
+    }
+
+    private void EnsureSlotHasHighlight(HotbarSlotUI slot)
+    {
+        if (slot == null) return;
+
+        if (slot.selectedHighlight != null) return;
+
+        // common child names to search for
+        string[] candidates = new string[] { "selectedHighlight", "SelectedHighlight", "selected_outline", "selectedOutline", "img_SelectedOutline", "selected" };
+
+        foreach (var name in candidates)
+        {
+            var t = slot.transform.Find(name);
+            if (t != null)
+            {
+                slot.selectedHighlight = t.gameObject;
+                slot.selectedHighlight.SetActive(false);
+                return;
+            }
+        }
+
+        // fallback: create explicit 1px-style border images so the outline is always visible
+        GameObject hl = new GameObject("selectedHighlight", typeof(RectTransform));
+        hl.transform.SetParent(slot.transform, false);
+        var rt = hl.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        // create 4 border edges
+        Color borderCol = new Color(1f, 0.85f, 0f, 0.95f);
+        float thickness = 8f; // pixels (doubled)
+
+        void MakeEdge(string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+        {
+            GameObject edge = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            edge.transform.SetParent(hl.transform, false);
+            var ert = edge.GetComponent<RectTransform>();
+            ert.anchorMin = anchorMin;
+            ert.anchorMax = anchorMax;
+            ert.offsetMin = offsetMin;
+            ert.offsetMax = offsetMax;
+            var eimg = edge.GetComponent<Image>();
+            eimg.color = borderCol;
+            eimg.raycastTarget = false;
+        }
+
+        // Top
+        MakeEdge("edge_top", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -thickness), new Vector2(0f, 0f));
+        // Bottom
+        MakeEdge("edge_bottom", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(0f, thickness));
+        // Left
+        MakeEdge("edge_left", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(thickness, 0f));
+        // Right
+        MakeEdge("edge_right", new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(-thickness, 0f), new Vector2(0f, 0f));
+
+        // ensure visible on top
+        hl.transform.SetAsLastSibling();
+        slot.selectedHighlight = hl;
+        slot.selectedHighlight.SetActive(false);
+        Debug.Log($"HotbarManager: Created border highlight for slot '{slot.gameObject.name}'");
+    }
+
+    private void Start() { AutoMapUISlotsIfNeeded(); RefreshUI(); }
+
+    private void Update()
+    {
+        // Chuyển slot bằng phím số 1-9
+        for (int i = 0; i < 9; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                SelectSlot(i);
+            }
+        }
+        // Phím 0 cho slot thứ 10 (index 9)
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            SelectSlot(9);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            RemoveSelectedSlotItem();
+        }
+    }
+
+    public void RemoveSelectedSlotItem()
+    {
+        if (items == null || items.Count == 0)
+        {
+            return;
+        }
+
+        if (SelectedSlotIndex < 0 || SelectedSlotIndex >= items.Count)
+        {
+            return;
+        }
+
+        items.RemoveAt(SelectedSlotIndex);
+        if (SelectedSlotIndex >= items.Count)
+        {
+            SelectedSlotIndex = Mathf.Max(0, items.Count - 1);
+        }
+
+        RefreshUI();
+    }
+
+    public void SelectSlot(int index)
+    {
+        if (uiSlots == null || uiSlots.Length == 0)
+        {
+            Debug.LogWarning("HotbarManager: uiSlots not mapped yet; cannot select slot.");
+            return;
+        }
+
+        if (index >= 0 && index < uiSlots.Length)
+        {
+            SelectedSlotIndex = index;
+            // TODO: Ở đây bạn có thể gọi hàm cập nhật UI hiển thị viền vàng quanh slot đang chọn
+            Debug.Log($"Đang chọn Slot: {index + 1}");
+            RefreshUI();
+        }
+    }
 
     public void AddDish(BaseItemSO dishData, float stars)
     {
         if (items == null) items = new List<StoredItem>();
 
-        StoredItem existingInBar = items.Find(x => x.itemData.id == dishData.id);
-
-        if (existingInBar != null)
+        // Chỉ kiểm tra item stack nếu item này TỪ CHỐI TÁCH RIÊNG (Không phải thành phẩm món ăn)
+        // Đề bài yêu cầu: món ăn (dish) không stack, phải ném vào slot mới
+        if (dishData.itemType != "Dish") // Giả sử "Dish" là tag phân loại món ăn nấu ra. Nếu không phải Dish thì cho stack
         {
-            if (existingInBar.quantity < 999)
+            StoredItem existingInBar = items.Find(x => x.itemData.id == dishData.id);
+            if (existingInBar != null)
             {
-                existingInBar.quantity++;
-                existingInBar.currentFreshness = (existingInBar.currentFreshness + (stars * 20f)) / 2f;
+                if (existingInBar.quantity < 999)
+                {
+                    existingInBar.quantity++;
+                    existingInBar.currentFreshness = (existingInBar.currentFreshness + (stars * 20f)) / 2f;
+                    RefreshUI();
+                    return;
+                }
             }
         }
-        else
+        
+        // Món ăn hoặc không có sẵn thì tạo ô mới
+        int slotCapacity = (uiSlots != null && uiSlots.Length > 0) ? uiSlots.Length : 10;
+        if (items.Count < slotCapacity)
         {
-            if (items.Count < 10)
-            {
-                StoredItem newEntry = new StoredItem(dishData, 1);
-                newEntry.currentFreshness = stars * 20f;
-                items.Add(newEntry);
-            }
+            StoredItem newEntry = new StoredItem(dishData, 1);
+            newEntry.currentFreshness = stars * 20f;
+            items.Add(newEntry);
         }
 
         RefreshUI();
@@ -40,12 +249,31 @@ public class HotbarManager : MonoBehaviour
     [ContextMenu("Refresh Hotbar UI")]
     public void RefreshUI()
     {
+        if (uiSlots == null || uiSlots.Length == 0)
+        {
+            Debug.Log("HotbarManager: RefreshUI skipped because uiSlots not mapped.");
+            return;
+        }
+
+        if (items == null)
+        {
+            items = new List<StoredItem>();
+        }
+
         for (int i = 0; i < uiSlots.Length; i++)
         {
-            if (i < items.Count)
+            if (uiSlots[i] == null) continue;
+
+            if (i < items.Count && items[i] != null && items[i].itemData != null)
+            {
                 uiSlots[i].Setup(items[i]);
+            }
             else
+            {
                 uiSlots[i].Clear();
+            }
+            // Toggle selected visual
+            uiSlots[i].SetSelected(i == SelectedSlotIndex);
         }
     }
 
@@ -62,6 +290,6 @@ public class HotbarManager : MonoBehaviour
 
     private void OnValidate()
     {
-        if (Instance != null) RefreshUI();
+        if (Instance != null && Application.isPlaying) RefreshUI();
     }
 }

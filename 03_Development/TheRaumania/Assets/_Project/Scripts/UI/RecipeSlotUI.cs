@@ -14,14 +14,8 @@ public class RecipeSlotUI : MonoBehaviour
         _data = data;
         imgIcon.sprite = data.dishIcon;
         txtName.text = data.dishName;
-
-        // Lấy component Button ngay trên ô này
         _btn = GetComponent<Button>();
-
-        // Xóa các lệnh cũ để tránh bấm 1 lần chạy 2 món
         _btn.onClick.RemoveAllListeners();
-
-        // Cắm dây lệnh: Khi bấm vào ô này, gọi hàm Select của CookingManager
         _btn.onClick.AddListener(() => {
             CookingManager.Instance.SelectRecipe(_data);
         });

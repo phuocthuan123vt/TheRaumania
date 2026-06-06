@@ -749,7 +749,13 @@ PlayerSettings:
   XboxOneOverrideIdentityName: 
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
-  cloudServicesEnabled: {}
+  cloudServicesEnabled:
+    Build: 0
+    Game Performance: 0
+    Legacy Analytics: 0
+    Purchasing: 0
+    UDP: 0
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -769,11 +775,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: a5f1f91d-97cb-4131-b443-83b253c3ed90
+  cloudProjectId: d941a9af-bddb-42fa-a881-1939251660ef
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: TheRaumania
-  organizationId: unity_24521739
+  organizationId: banhpao
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

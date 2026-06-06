@@ -1,28 +1,22 @@
-﻿using UnityEngine;
-using UnityEngine.Events; // Cần cái này để dùng UnityEvent
-
+using UnityEngine;
+using UnityEngine.Events;
 public class Interactable : MonoBehaviour
 {
     #region Variables
     [Header("Cài đặt tương tác")]
     public string interactMessage = "Nhấn E để tương tác";
-    public UnityEvent onInteract; // Đây là "ổ cắm" - ông sẽ kéo lệnh vào đây từ Inspector
-
+    public float interactRange = 2f;
+    public UnityEvent onInteract;
     private bool _isPlayerInRange = false;
     #endregion
-
-    // Khi người chơi đi vào vùng cảm biến (Collider2D isTrigger)
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
             _isPlayerInRange = true;
             Debug.Log(interactMessage);
-            // Sau này ông sẽ gọi UI hiện lên ở đây
         }
     }
-
-    // Khi người chơi đi ra khỏi vùng cảm biến
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -30,14 +24,32 @@ public class Interactable : MonoBehaviour
             _isPlayerInRange = false;
         }
     }
-
-    // Hàm này sẽ được gọi từ PlayerMovement khi người chơi nhấn phím E
+    // Backwards-compatible no-arg trigger: will try to find Player and use its position.
     public void TriggerInteraction()
     {
-        if (_isPlayerInRange)
+        var player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            TriggerInteraction((Vector2)player.transform.position);
+        }
+        else if (_isPlayerInRange)
         {
             Debug.Log($"Đang tương tác với: {gameObject.name}");
-            onInteract.Invoke(); // Kích hoạt tất cả các lệnh đã cắm vào
+            onInteract.Invoke();
+        }
+    }
+
+    // New: distance-based interaction to avoid relying solely on trigger enter/exit.
+    public void TriggerInteraction(Vector2 playerPosition)
+    {
+        if (Vector2.Distance(playerPosition, transform.position) <= interactRange)
+        {
+            Debug.Log($"Đang tương tác với: {gameObject.name} (range ok)");
+            onInteract.Invoke();
+        }
+        else
+        {
+            Debug.Log($"Quá xa để tương tác với: {gameObject.name}");
         }
     }
 }

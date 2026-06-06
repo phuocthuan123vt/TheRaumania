@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
 
 public class ForcePalette
@@ -9,7 +11,7 @@ public class ForcePalette
         GameObject paletteObj = new GameObject("pal_Fixed_System");
         paletteObj.AddComponent<Grid>();
 
-        string path = "Assets/_Project/Art/Tiles/pal_Fixed_System.prefab";
+        string path = "Assets/_Project/Art/GroundTiles/groundpal_Fixed_System.prefab";
 
         PrefabUtility.SaveAsPrefabAsset(paletteObj, path);
 
@@ -19,3 +21,4 @@ public class ForcePalette
         Debug.Log("<color=green>Đã tạo thành công Palette tại: </color>" + path);
     }
 }
+#endif

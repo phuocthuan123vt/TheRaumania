@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -8,6 +8,7 @@ public class HotbarSlotUI : MonoBehaviour
     public TextMeshProUGUI txtQty;
     public TextMeshProUGUI txtStars;
     public GameObject content;
+    public GameObject selectedHighlight; // assign a child GameObject to show selection (outline, glow, etc.)
 
     public void Setup(StoredItem item)
     {
@@ -23,5 +24,22 @@ public class HotbarSlotUI : MonoBehaviour
     public void Clear()
     {
         if (content != null) content.SetActive(false);
+        if (selectedHighlight != null) selectedHighlight.SetActive(false);
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        if (selectedHighlight != null)
+        {
+            selectedHighlight.SetActive(isSelected);
+        }
+        else
+        {
+            // fallback: change icon color to indicate selection
+            if (imgIcon != null)
+            {
+                imgIcon.color = isSelected ? Color.yellow : Color.white;
+            }
+        }
     }
 }
