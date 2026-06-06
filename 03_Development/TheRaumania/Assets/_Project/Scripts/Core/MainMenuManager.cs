@@ -35,7 +35,7 @@ public class MainMenuManager : MonoBehaviour
         if (pnlMainMenu == null) pnlMainMenu = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_MainMenu");
         if (pnlLoadDialog == null) pnlLoadDialog = RuntimeReferenceFinder.FindDeepGameObject(root, "pnl_LoadDialog");
 
-        if ((slotTexts == null || slotTexts.Length == 0 || System.Array.Exists(slotTexts, slot => slot == null)) && pnlLoadDialog != null)
+        if (pnlLoadDialog != null)
         {
             var slotButtons = RuntimeReferenceFinder.FindChildrenMatching(
                 pnlLoadDialog.transform,
@@ -44,11 +44,22 @@ public class MainMenuManager : MonoBehaviour
             slotButtons.Sort((a, b) => a.GetSiblingIndex().CompareTo(b.GetSiblingIndex()));
 
             int takeCount = Mathf.Min(10, slotButtons.Count);
-            slotTexts = new TextMeshProUGUI[takeCount];
+            if (slotTexts == null || slotTexts.Length != takeCount || System.Array.Exists(slotTexts, slot => slot == null))
+            {
+                slotTexts = new TextMeshProUGUI[takeCount];
+            }
 
             for (int i = 0; i < takeCount; i++)
             {
                 slotTexts[i] = slotButtons[i].GetComponentInChildren<TextMeshProUGUI>(true);
+                
+                UnityEngine.UI.Button btn = slotButtons[i].GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    int slotIndex = i + 1;
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnSlotClicked(slotIndex));
+                }
             }
         }
 

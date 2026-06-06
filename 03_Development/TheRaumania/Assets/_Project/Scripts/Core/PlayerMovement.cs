@@ -15,6 +15,12 @@ public class PlayerMovement : MonoBehaviour
     private Animator _anim;
     #endregion
 
+    public float MoveSpeed
+    {
+        get => _moveSpeed;
+        set => _moveSpeed = Mathf.Max(0.1f, value);
+    }
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();

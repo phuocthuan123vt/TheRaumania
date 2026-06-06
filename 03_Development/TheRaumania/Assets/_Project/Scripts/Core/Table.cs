@@ -23,6 +23,10 @@ public class Table : MonoBehaviour
         }
         interactable.interactMessage = "Nhấn E để xếp bàn";
         interactable.interactRange = 2f;
+        if (interactable.onInteract == null)
+        {
+            interactable.onInteract = new UnityEngine.Events.UnityEvent();
+        }
         interactable.onInteract.RemoveAllListeners();
         interactable.onInteract.AddListener(OnTableInteracted);
     }

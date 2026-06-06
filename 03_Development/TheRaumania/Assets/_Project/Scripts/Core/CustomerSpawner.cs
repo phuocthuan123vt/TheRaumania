@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CustomerSpawner : MonoBehaviour
 {
@@ -33,6 +34,12 @@ public class CustomerSpawner : MonoBehaviour
 
         while (isSpawning)
         {
+            if (gameObject.scene != SceneManager.GetActiveScene())
+            {
+                yield return new WaitForSeconds(1f);
+                continue;
+            }
+
             if (HUDManager.Instance != null && !HUDManager.Instance.IsRestaurantOpen)
             {
                 yield return new WaitForSeconds(1f);
@@ -53,13 +60,21 @@ public class CustomerSpawner : MonoBehaviour
 
             yield return new WaitForSeconds(currentDelay);
 
+            if (gameObject.scene != SceneManager.GetActiveScene())
+            {
+                continue;
+            }
+
             if (HUDManager.Instance != null && !HUDManager.Instance.IsRestaurantOpen)
             {
                 continue;
             }
 
-            // 3. Sinh khách
-            SpawnCustomer(currentStars);
+            // 3. Sinh khách nếu hàng chờ chưa đầy (dưới 3 khách)
+            if (CustomerAI.GetQueueCount() < 3)
+            {
+                SpawnCustomer(currentStars);
+            }
         }
     }
 
@@ -100,7 +115,13 @@ public class CustomerSpawner : MonoBehaviour
         // Đẻ khách ra đời
         if (prefabToSpawn != null)
         {
-            Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity);
+            Vector3 spawnPos = spawnPoint.position;
+            UnityEngine.AI.NavMeshHit hit;
+            if (UnityEngine.AI.NavMesh.SamplePosition(spawnPos, out hit, 10.0f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                spawnPos = hit.position;
+            }
+            Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
         }
         else
         {

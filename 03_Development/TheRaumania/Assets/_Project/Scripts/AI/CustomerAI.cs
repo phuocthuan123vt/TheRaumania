@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using BehaviorTree;
+using UnityEngine.SceneManagement;
 
 public class CustomerAI : MonoBehaviour
 {
@@ -12,7 +13,20 @@ public class CustomerAI : MonoBehaviour
 
     [Header("Du lieu & Trang thai")]
     public CustomerProfileSO profile;
-    public CustomerState currentState;
+    
+    private CustomerState _currentState;
+    public CustomerState currentState
+    {
+        get => _currentState;
+        set
+        {
+            CustomerState oldState = _currentState;
+            if (oldState == value) return;
+            _currentState = value;
+            OnStateChanged(oldState, _currentState);
+        }
+    }
+
     public float currentPatience = 100f;
 
     [Header("Behavior Tree Flags")]
@@ -59,6 +73,117 @@ public class CustomerAI : MonoBehaviour
     private TMPro.TextMeshProUGUI _windowSeatText;
     public GameObject dirtPrefab;
 
+    // --- HÀNG CHỜ TĨNH (QUEUE MANAGEMENT) ---
+    public static List<CustomerAI> activeQueue = new List<CustomerAI>();
+
+    public static void UpdateQueuePositions()
+    {
+        activeQueue.RemoveAll(item => item == null);
+        
+        Transform spawnTrans = null;
+        CustomerSpawner spawner = FindObjectOfType<CustomerSpawner>();
+        if (spawner != null && spawner.spawnPoint != null)
+        {
+            spawnTrans = spawner.spawnPoint;
+        }
+        else
+        {
+            GameObject go = GameObject.Find("SpawnPoint");
+            if (go == null) go = GameObject.Find("ExitPoint");
+            if (go != null) spawnTrans = go.transform;
+        }
+
+        if (spawnTrans == null) return;
+
+        float spacing = 0.8f;
+        for (int i = 0; i < activeQueue.Count; i++)
+        {
+            CustomerAI customer = activeQueue[i];
+            if (customer != null && customer.currentState == CustomerState.Queueing)
+            {
+                Vector3 targetPos = spawnTrans.position + Vector3.up * (i * spacing);
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(targetPos, out hit, 10.0f, NavMesh.AllAreas))
+                {
+                    targetPos = hit.position;
+                }
+                customer.SetQueueDestination(targetPos);
+            }
+        }
+    }
+
+    public static int GetQueueCount()
+    {
+        activeQueue.RemoveAll(item => item == null);
+        return activeQueue.Count;
+    }
+
+    private void OnStateChanged(CustomerState oldState, CustomerState newState)
+    {
+        if (oldState == CustomerState.Queueing && newState != CustomerState.Queueing)
+        {
+            if (activeQueue.Contains(this))
+            {
+                activeQueue.Remove(this);
+                UpdateQueuePositions();
+            }
+        }
+        else if (oldState != CustomerState.Queueing && newState == CustomerState.Queueing)
+        {
+            if (!activeQueue.Contains(this))
+            {
+                activeQueue.Add(this);
+                UpdateQueuePositions();
+            }
+        }
+    }
+
+    public bool SafeSetDestination(Vector3 dest, float stoppingDist = 0f)
+    {
+        if (_agent == null) return false;
+        
+        if (!_agent.enabled)
+        {
+            _agent.enabled = true;
+        }
+
+        if (!_agent.isOnNavMesh)
+        {
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(transform.position, out hit, 10.0f, NavMesh.AllAreas))
+            {
+                _agent.enabled = false;
+                transform.position = hit.position;
+                _agent.enabled = true;
+            }
+        }
+
+        if (_agent.isActiveAndEnabled && _agent.isOnNavMesh)
+        {
+            _agent.isStopped = false;
+            _agent.stoppingDistance = stoppingDist;
+            _agent.SetDestination(dest);
+            return true;
+        }
+        
+        Debug.LogWarning($"SafeSetDestination failed: agent is still not on NavMesh at {transform.position}");
+        return false;
+    }
+
+    public void SetQueueDestination(Vector3 targetPos)
+    {
+        SafeSetDestination(targetPos, 0f);
+    }
+
+    private void OnDestroy()
+    {
+        if (activeQueue.Contains(this))
+        {
+            activeQueue.Remove(this);
+            UpdateQueuePositions();
+        }
+    }
+
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -80,7 +205,7 @@ public class CustomerAI : MonoBehaviour
         }
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
         currentState = CustomerState.Queueing;
         ConstructBehaviorTree();
@@ -100,6 +225,18 @@ public class CustomerAI : MonoBehaviour
             if (_windowSeatText != null)
             {
                 _windowSeatText.gameObject.SetActive(true);
+            }
+        }
+
+        // Chờ 1 frame để NavMeshAgent và vị trí ổn định trên NavMesh
+        yield return null;
+
+        if (currentState == CustomerState.Queueing)
+        {
+            if (!activeQueue.Contains(this))
+            {
+                activeQueue.Add(this);
+                UpdateQueuePositions();
             }
         }
     }
@@ -260,6 +397,11 @@ public class CustomerAI : MonoBehaviour
 
     private void Update()
     {
+        if (gameObject.scene != SceneManager.GetActiveScene())
+        {
+            return;
+        }
+
         UpdateVisuals();
         UpdateContextualReactions();
 
@@ -298,21 +440,13 @@ public class CustomerAI : MonoBehaviour
         currentState = CustomerState.WalkingToTable;
         _isPatienceActive = true;
 
-        // small safety: un-stop agent and enable it before setting destination
-        if (_agent != null)
+        if (assignedTable.seats[_mySeatIndex].point != null)
         {
-            _agent.enabled = true;
-            _agent.isStopped = false;
-            _agent.stoppingDistance = 0f; // Reset stopping distance so they walk all the way to the chair
-            _agent.ResetPath();
-            if (assignedTable.seats[_mySeatIndex].point != null)
-            {
-                _agent.SetDestination(assignedTable.seats[_mySeatIndex].point.position);
-            }
-            else
-            {
-                Debug.LogWarning($"CustomerAI.LeadToSeat: seat point is null for table {table?.name} seat {seatIndex}");
-            }
+            SafeSetDestination(assignedTable.seats[_mySeatIndex].point.position, 0f);
+        }
+        else
+        {
+            Debug.LogWarning($"CustomerAI.LeadToSeat: seat point is null for table {table?.name} seat {seatIndex}");
         }
     }
 
@@ -811,26 +945,11 @@ public class CustomerAI : MonoBehaviour
             _anim.CrossFade("Movement", 0.05f);
         }
 
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(transform.position, out hit, 2.0f, NavMesh.AllAreas))
-        {
-            transform.position = hit.position;
-        }
-
-        _agent.enabled = true;
-        _agent.isStopped = false;
-
         Vector3 finalDest = ResolveLeaveDestination();
-
-        if (_agent.isOnNavMesh)
-        {
-            _agent.ResetPath();
-        }
-
-        _agent.SetDestination(finalDest);
+        SafeSetDestination(finalDest, 0f);
         Debug.Log($"CustomerAI: angry leave to SpawnPoint at {finalDest} | onNavMesh={_agent.isOnNavMesh} | pathStatus={_agent.pathStatus}");
 
-        if (_agent.pathStatus != NavMeshPathStatus.PathComplete)
+        if (_agent.isActiveAndEnabled && _agent.isOnNavMesh && _agent.pathStatus != NavMeshPathStatus.PathComplete)
         {
             Vector3 escapePoint = FindEscapePointTowards(finalDest);
             if (escapePoint != Vector3.zero && Vector3.Distance(transform.position, escapePoint) > 0.05f)
@@ -1165,32 +1284,19 @@ public class CustomerAI : MonoBehaviour
 
     private void FollowPlayer()
     {
-        if (_agent == null) return;
-        if (!_agent.enabled) _agent.enabled = true;
-        _agent.isStopped = false;
-        
-        _agent.stoppingDistance = 1.5f;
-
         GameObject player = GameObject.FindWithTag("Player");
         if (player != null)
         {
-            _agent.SetDestination(player.transform.position);
+            SafeSetDestination(player.transform.position, 1.5f);
         }
     }
 
     public void ReturnToQueue()
     {
-        if (_agent != null)
+        Transform spawnTrans = FindSpawnPointTransform();
+        if (spawnTrans != null)
         {
-            _agent.stoppingDistance = 0f;
-            if (!_agent.enabled) _agent.enabled = true;
-            _agent.isStopped = false;
-            
-            Transform spawnTrans = FindSpawnPointTransform();
-            if (spawnTrans != null)
-            {
-                _agent.SetDestination(spawnTrans.position);
-            }
+            SafeSetDestination(spawnTrans.position, 0f);
         }
     }
 

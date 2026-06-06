@@ -175,7 +175,10 @@ public class GameplayManager : MonoBehaviour
     {
         SaveActiveGameToSlot(slotIndex, inputSaveName != null ? inputSaveName.text : null);
 
-        inputSaveName.text = ""; // Xóa input
+        if (inputSaveName != null)
+        {
+            inputSaveName.text = ""; // Xóa input
+        }
         RefreshSlotsUI();        // Load lại chữ
     }
 
@@ -285,7 +288,7 @@ public class GameplayManager : MonoBehaviour
             inputSaveName = pnlSaveDialog.GetComponentInChildren<TMP_InputField>(true);
         }
 
-        if ((slotTexts == null || slotTexts.Length == 0 || System.Array.Exists(slotTexts, slot => slot == null)) && pnlSaveDialog != null)
+        if (pnlSaveDialog != null)
         {
             var slotButtons = RuntimeReferenceFinder.FindChildrenMatching(
                 pnlSaveDialog.transform,
@@ -294,11 +297,22 @@ public class GameplayManager : MonoBehaviour
             slotButtons.Sort((a, b) => a.GetSiblingIndex().CompareTo(b.GetSiblingIndex()));
 
             int takeCount = Mathf.Min(10, slotButtons.Count);
-            slotTexts = new TextMeshProUGUI[takeCount];
+            if (slotTexts == null || slotTexts.Length != takeCount || System.Array.Exists(slotTexts, slot => slot == null))
+            {
+                slotTexts = new TextMeshProUGUI[takeCount];
+            }
 
             for (int i = 0; i < takeCount; i++)
             {
                 slotTexts[i] = slotButtons[i].GetComponentInChildren<TextMeshProUGUI>(true);
+                
+                UnityEngine.UI.Button btn = slotButtons[i].GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    int slotIndex = i + 1;
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnSaveSlotClicked(slotIndex));
+                }
             }
         }
     }

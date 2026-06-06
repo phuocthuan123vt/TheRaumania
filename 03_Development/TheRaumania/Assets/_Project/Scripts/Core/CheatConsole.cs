@@ -33,6 +33,7 @@ public class CheatConsole : MonoBehaviour
     private bool IsToggleKeyPressed()
     {
         if (Input.GetKeyDown(KeyCode.BackQuote)) return true;
+        if (Input.GetKeyDown(KeyCode.F1)) return true; // Hỗ trợ F1 làm phím mở cheat console dự phòng cực kỳ an toàn
 
         string typed = Input.inputString;
         if (!string.IsNullOrEmpty(typed) && (typed.Contains("`") || typed.Contains("~")))
@@ -65,8 +66,8 @@ public class CheatConsole : MonoBehaviour
         GUI.SetNextControlName("CheatInput");
         input = GUI.TextField(new Rect(10, Screen.height - 40, Screen.width - 20, 30), input);
         
-        // Format lại nếu lỡ dính dấu ~ khi vừa bật console
-        input = input.Replace("`", "");
+        // Format lại nếu lỡ dính dấu ~ hoặc ` khi vừa bật console
+        input = input.Replace("`", "").Replace("~", "");
 
         // Tự động focus vào ô này để gõ được liền
         GUI.FocusControl("CheatInput");
@@ -102,6 +103,163 @@ public class CheatConsole : MonoBehaviour
                 break;
 
             // TODO: Bạn có thể thêm nhiều case ở đây sau này như "addmoney", "setrating", v.v.
+            case "money":
+            case "addmoney":
+                if (args.Length >= 2 && int.TryParse(args[1], out int moneyAmount))
+                {
+                    PlayerData.AddCredit(moneyAmount);
+                    Debug.Log($"<color=green>Cheat: Đã thêm {moneyAmount} RC!</color>");
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: money [số_tiền]</color>");
+                }
+                break;
+
+            case "time":
+            case "addtime":
+                if (args.Length >= 2 && int.TryParse(args[1], out int hoursToAdd))
+                {
+                    if (HUDManager.Instance != null)
+                    {
+                        int newHour = HUDManager.Instance.CurrentHour + hoursToAdd;
+                        int newDay = HUDManager.Instance.CurrentDay;
+                        while (newHour >= 24)
+                        {
+                            newHour -= 24;
+                            newDay += 1;
+                        }
+                        HUDManager.Instance.ApplyTimeState(newDay, newHour, HUDManager.Instance.CurrentMinute);
+                        Debug.Log($"<color=green>Cheat: Đã tua thêm {hoursToAdd} giờ!</color>");
+                    }
+                    else
+                    {
+                        Debug.Log("<color=red>Lỗi: Không tìm thấy HUDManager.Instance!</color>");
+                    }
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: time [số_giờ]</color>");
+                }
+                break;
+
+            case "skipday":
+            case "nextday":
+                if (HUDManager.Instance != null)
+                {
+                    HUDManager.Instance.SkipToNextDayMorning();
+                    Debug.Log("<color=green>Cheat: Đã bỏ qua ngày và bắt đầu sáng hôm sau!</color>");
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi: Không tìm thấy HUDManager.Instance!</color>");
+                }
+                break;
+
+            case "hygiene":
+            case "sethygiene":
+                if (args.Length >= 2 && float.TryParse(args[1], out float hygieneVal))
+                {
+                    PlayerData.hygieneScore = Mathf.Clamp(hygieneVal, 0f, 10f);
+                    if (RestaurantRatingManager.Instance != null)
+                    {
+                        RestaurantRatingManager.Instance.RefreshRating();
+                    }
+                    Debug.Log($"<color=green>Cheat: Đã đặt điểm vệ sinh thành {PlayerData.hygieneScore}/10!</color>");
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: hygiene [0..10]</color>");
+                }
+                break;
+
+            case "speed":
+            case "setspeed":
+                if (args.Length >= 2 && float.TryParse(args[1], out float speedVal))
+                {
+                    PlayerMovement pm = FindObjectOfType<PlayerMovement>();
+                    if (pm != null)
+                    {
+                        pm.MoveSpeed = speedVal;
+                        Debug.Log($"<color=green>Cheat: Đã đặt tốc độ di chuyển người chơi thành {pm.MoveSpeed}!</color>");
+                    }
+                    else
+                    {
+                        Debug.Log("<color=red>Lỗi: Không tìm thấy người chơi (PlayerMovement) trong cảnh hiện tại!</color>");
+                    }
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: speed [tốc_độ]</color>");
+                }
+                break;
+
+            case "food":
+            case "setfood":
+                if (args.Length >= 2 && float.TryParse(args[1], out float foodVal))
+                {
+                    PlayerData.foodQualityScore = Mathf.Clamp(foodVal, 0f, 10f);
+                    if (RestaurantRatingManager.Instance != null)
+                    {
+                        RestaurantRatingManager.Instance.RefreshRating();
+                    }
+                    Debug.Log($"<color=green>Cheat: Đã đặt điểm món ăn thành {PlayerData.foodQualityScore}/10!</color>");
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: food [0..10]</color>");
+                }
+                break;
+
+            case "decor":
+            case "setdecor":
+                if (args.Length >= 2 && float.TryParse(args[1], out float decorVal))
+                {
+                    PlayerData.decorationScore = Mathf.Clamp(decorVal, 0f, 10f);
+                    if (UpgradeManager.Instance != null)
+                    {
+                        if (decorVal < 5f)
+                            UpgradeManager.Instance.highestUnlockedLevel = 1;
+                        else if (decorVal < 8f)
+                            UpgradeManager.Instance.highestUnlockedLevel = 2;
+                        else
+                            UpgradeManager.Instance.highestUnlockedLevel = 3;
+                    }
+                    if (RestaurantRatingManager.Instance != null)
+                    {
+                        RestaurantRatingManager.Instance.RefreshRating();
+                    }
+                    Debug.Log($"<color=green>Cheat: Đã đặt điểm trang trí thành {PlayerData.decorationScore}/10 (Cấp độ: {(UpgradeManager.Instance != null ? UpgradeManager.Instance.highestUnlockedLevel.ToString() : "N/A")})!</color>");
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: decor [0..10]</color>");
+                }
+                break;
+
+            case "service":
+            case "setservice":
+            case "attitude":
+            case "setattitude":
+                if (args.Length >= 2 && float.TryParse(args[1], out float serviceVal))
+                {
+                    float clampedVal = Mathf.Clamp(serviceVal, 0f, 10f);
+                    PlayerData.satisfactionHistory.Clear();
+                    for (int i = 0; i < 5; i++)
+                    {
+                        PlayerData.satisfactionHistory.Enqueue(clampedVal);
+                    }
+                    if (RestaurantRatingManager.Instance != null)
+                    {
+                        RestaurantRatingManager.Instance.RefreshRating();
+                    }
+                    Debug.Log($"<color=green>Cheat: Đã đặt điểm thái độ phục vụ thành {clampedVal}/10!</color>");
+                }
+                else
+                {
+                    Debug.Log("<color=red>Lỗi cú pháp! Cách dùng: service [0..10]</color>");
+                }
+                break;
 
             default:
                 Debug.Log($"<color=red>Lệnh không tồn tại: {command}</color>");
@@ -111,11 +269,22 @@ public class CheatConsole : MonoBehaviour
 
     private void GiveItem(string itemId, int amount)
     {
-        // Tìm vật phẩm bằng id, hoặc nếu nhập nhầm id thì tìm vớt bằng file name/itemName
-        BaseItemSO foundItem = itemDatabase.Find(x => 
-            x.id.ToLower() == itemId.ToLower() || 
-            x.name.ToLower() == itemId.ToLower() ||
-            x.itemName.ToLower() == itemId.ToLower());
+        BaseItemSO foundItem = null;
+        if (itemDatabase != null)
+        {
+            foundItem = itemDatabase.Find(x => 
+                x != null && (x.id.ToLower() == itemId.ToLower() || 
+                x.name.ToLower() == itemId.ToLower() ||
+                x.itemName.ToLower() == itemId.ToLower()));
+        }
+
+        if (foundItem == null && ShopManager.Instance != null && ShopManager.Instance.allItems != null)
+        {
+            foundItem = ShopManager.Instance.allItems.Find(x => 
+                x != null && (x.id.ToLower() == itemId.ToLower() || 
+                x.name.ToLower() == itemId.ToLower() ||
+                x.itemName.ToLower() == itemId.ToLower()));
+        }
 
         if (foundItem != null)
         {
