@@ -25,6 +25,13 @@ public class PersistentGameManager : MonoBehaviour
             // Ensure persistent root is undestroyable; call on root to avoid editor warnings
             DontDestroyOnLoad(this.transform.root.gameObject); // Bất tử qua mọi bản map
             
+            // Tự động gắn CheatConsole vào GameManager để mở được ở tất cả các cảnh
+            if (GetComponent<CheatConsole>() == null)
+            {
+                gameObject.AddComponent<CheatConsole>();
+                Debug.Log("PersistentGameManager: CheatConsole component dynamically added at runtime.");
+            }
+
             // Đăng ký rà soát sự kiện khi 1 Map mới được load xong
             SceneManager.sceneLoaded += OnSceneLoaded;
         }

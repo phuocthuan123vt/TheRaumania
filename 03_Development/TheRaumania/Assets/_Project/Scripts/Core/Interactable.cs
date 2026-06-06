@@ -6,7 +6,7 @@ public class Interactable : MonoBehaviour
     [Header("Cài đặt tương tác")]
     public string interactMessage = "Nhấn E để tương tác";
     public float interactRange = 2f;
-    public UnityEvent onInteract;
+    public UnityEvent onInteract = new UnityEvent();
     private bool _isPlayerInRange = false;
     #endregion
     private void OnTriggerEnter2D(Collider2D other)

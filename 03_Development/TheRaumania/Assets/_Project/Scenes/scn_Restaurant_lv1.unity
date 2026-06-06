@@ -72535,13 +72535,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3972680592764281004, guid: 7965ba6e8bf2ebb409d316988fd80a81, type: 3}
+      propertyPath: minSpawnDelay
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 5944867451784350667, guid: 7965ba6e8bf2ebb409d316988fd80a81, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4.95
       objectReference: {fileID: 0}
     - target: {fileID: 5944867451784350667, guid: 7965ba6e8bf2ebb409d316988fd80a81, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.34
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5944867451784350667, guid: 7965ba6e8bf2ebb409d316988fd80a81, type: 3}
       propertyPath: m_LocalPosition.z
@@ -72693,7 +72697,7 @@ SceneRoots:
   - {fileID: 1260498424}
   - {fileID: 2103166063}
   - {fileID: 1300730831}
+  - {fileID: 4283146542336429389}
   - {fileID: 2140494190}
   - {fileID: 979084300275516248}
   - {fileID: 2073872586}
-  - {fileID: 4283146542336429389}
