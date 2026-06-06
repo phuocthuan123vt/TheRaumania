@@ -26,6 +26,8 @@ public class FryingMinigame : MinigameBase
     private float _nextChangeTime;
     private List<float> _cookSamples = new List<float>();
     private float _sampleTimer;
+    private float _totalGameTime;
+    private bool _hasTriggeredFire;
 
     public override MinigameType GetMinigameType() => MinigameType.Frying;
 
@@ -36,6 +38,8 @@ public class FryingMinigame : MinigameBase
         _isActive = true;
         _sampleTimer = 0;
         _cookSamples.Clear();
+        _totalGameTime = 0f;
+        _hasTriggeredFire = false;
 
         tempSlider.value = 0.2f;
         _targetCenter = 0.5f;
@@ -46,6 +50,15 @@ public class FryingMinigame : MinigameBase
     void Update()
     {
         if (!_isActive) return;
+
+        _totalGameTime += Time.deltaTime;
+        if (_totalGameTime > 15f && !_hasTriggeredFire)
+        {
+            _hasTriggeredFire = true;
+            TriggerKitchenFire();
+            return;
+        }
+
         if (Time.time > _nextChangeTime)
         {
             _targetCenter = Random.Range(0.25f, 0.75f);
@@ -109,5 +122,15 @@ public class FryingMinigame : MinigameBase
         foreach (var s in _cookSamples) sum += s;
         float finalM = (sum / _cookSamples.Count) * 100f;
         Complete(finalM);
+    }
+
+    void TriggerKitchenFire()
+    {
+        _isActive = false;
+        Complete(10f); // Hoàn thành với điểm tối thiểu
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.TriggerEventKitchenFire();
+        }
     }
 }

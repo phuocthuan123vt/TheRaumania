@@ -7,6 +7,132 @@ public class LevelManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
     }
+
+    private void Start()
+    {
+        StartCoroutine(RatCheckRoutine());
+    }
+
+    private System.Collections.IEnumerator RatCheckRoutine()
+    {
+        // Chờ một chút lúc đầu game
+        yield return new WaitForSeconds(5f);
+
+        while (true)
+        {
+            yield return new WaitForSeconds(20f);
+
+            // Chỉ chạy sự kiện ngẫu nhiên khi nhà hàng đang mở cửa
+            if (HUDManager.Instance != null && HUDManager.Instance.IsRestaurantOpen)
+            {
+                float hygiene = PlayerData.hygieneScore;
+                // Nội suy tuyến tính: Điểm vệ sinh = 10 -> 1% cơ hội, Điểm vệ sinh = 0 -> 35% cơ hội
+                float ratChance = Mathf.Lerp(0.35f, 0.01f, hygiene / 10f);
+
+                if (Random.value < ratChance)
+                {
+                    TriggerEventRat();
+                }
+            }
+        }
+    }
+
+    private TMPro.TMP_FontAsset GetFallbackFont()
+    {
+        if (TMPro.TMP_Settings.defaultFontAsset != null) return TMPro.TMP_Settings.defaultFontAsset;
+        TMPro.TextMeshProUGUI anyText = FindObjectOfType<TMPro.TextMeshProUGUI>(true);
+        if (anyText != null && anyText.font != null) return anyText.font;
+        return null;
+    }
+
+    public void ShowScreenWarning(string message, Color color)
+    {
+        Canvas canvas = null;
+        if (HUDManager.Instance != null)
+        {
+            Canvas[] hudCanvases = HUDManager.Instance.transform.root.GetComponentsInChildren<Canvas>(true);
+            foreach (var c in hudCanvases)
+            {
+                if (c.renderMode != RenderMode.WorldSpace)
+                {
+                    canvas = c;
+                    break;
+                }
+            }
+        }
+
+        if (canvas == null)
+        {
+            Canvas[] allCanvases = FindObjectsOfType<Canvas>();
+            foreach (var c in allCanvases)
+            {
+                if (c.renderMode != RenderMode.WorldSpace && c.GetComponentInParent<CustomerAI>() == null)
+                {
+                    canvas = c;
+                    break;
+                }
+            }
+        }
+
+        if (canvas == null)
+        {
+            Debug.LogError("No screen-space canvas found to show screen warning.");
+            return;
+        }
+
+        GameObject warningGo = new GameObject("txt_ScreenWarning", typeof(RectTransform), typeof(CanvasRenderer), typeof(TMPro.TextMeshProUGUI));
+        warningGo.transform.SetParent(canvas.transform, false);
+
+        RectTransform rect = warningGo.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = new Vector2(0f, 0f); // Giữa màn hình chính xác
+        rect.sizeDelta = new Vector2(1000f, 200f);
+        rect.localScale = Vector3.one;
+
+        TMPro.TextMeshProUGUI tmp = warningGo.GetComponent<TMPro.TextMeshProUGUI>();
+        tmp.font = GetFallbackFont();
+        tmp.fontSize = 64f; // Tăng kích thước chữ gấp đôi (từ 32f lên 64f)
+        tmp.color = color;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.text = message;
+        tmp.raycastTarget = false;
+
+        tmp.outlineColor = Color.black;
+        tmp.outlineWidth = 0.25f;
+
+        Destroy(warningGo, 5f); // Hiển thị khoảng 5s
+    }
+
+    public void TriggerEventKitchenFire()
+    {
+        ShowScreenWarning("CHÁY BẾP DO CHIÊN QUÁ LÂU! KHÁCH HÀNG HOẢNG SỢ BỎ CHẠY!", Color.red);
+
+        CustomerAI[] allCustomers = FindObjectsOfType<CustomerAI>();
+        foreach (var customer in allCustomers)
+        {
+            if (customer != null)
+            {
+                customer.TriggerPanic("FireEvent", customer.emoteAngry);
+            }
+        }
+    }
+
+    public void TriggerEventRat()
+    {
+        ShowScreenWarning("PHÁT HIỆN CHUỘT CHẠY TRONG QUÁN! KHÁCH HÀNG HOẢNG SỢ BỎ VỀ!", new Color(1f, 0.5f, 0f));
+
+        CustomerAI[] allCustomers = FindObjectsOfType<CustomerAI>();
+        foreach (var customer in allCustomers)
+        {
+            if (customer != null)
+            {
+                customer.TriggerPanic("RatEvent", customer.emoteNauseous);
+            }
+        }
+    }
+
     [Header("Dẫn khách")]
     public CustomerAI currentLedCustomer;
 

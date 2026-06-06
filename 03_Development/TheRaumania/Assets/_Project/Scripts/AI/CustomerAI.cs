@@ -777,6 +777,11 @@ public class CustomerAI : MonoBehaviour
         currentState = CustomerState.Leaving;
         _isPatienceActive = false;
 
+        if (LevelManager.Instance != null && LevelManager.Instance.currentLedCustomer == this)
+        {
+            LevelManager.Instance.currentLedCustomer = null;
+        }
+
         if (dirtPrefab != null && Random.value < 0.9f)
         {
             Instantiate(dirtPrefab, transform.position, Quaternion.identity);
@@ -1134,6 +1139,28 @@ public class CustomerAI : MonoBehaviour
         {
             imgOrderIcon.sprite = previous;
         }
+    }
+
+    public void TriggerPanic(string reason, Sprite customEmote = null)
+    {
+        if (currentState == CustomerState.CheckingOut || currentState == CustomerState.Leaving) return;
+
+        Debug.Log($"Customer panicked and is leaving due to: {reason}");
+        _dishStars = 0f;
+        currentPatience = 0f;
+        SubmitSatisfactionReview();
+
+        if (customEmote != null)
+        {
+            ShowEmote(customEmote);
+        }
+        else
+        {
+            ShowEmote(emoteAngry);
+        }
+
+        StopAllCoroutines();
+        OnLeave();
     }
 
     private void FollowPlayer()
