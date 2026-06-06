@@ -41,7 +41,7 @@ Chào mừng bạn đến với tài liệu hướng dẫn trải nghiệm game 
 2. Tìm đến mục **Releases** ở thanh bên phải màn hình.
 3. Chọn bản phát hành có tên: **`The Raumania - Alpha Version 1.0`**.
 4. Trong phần Assets của Release, tải về tệp tin:
-   * **`The-Raumania-v1.0-Alpha.zip`** (Dung lượng khoảng ~60MB).
+   * **`The-Raumania-v1.1.0-Alpha.zip`** (Dung lượng khoảng ~60MB).
 5. Nhấp chuột phải vào tệp ZIP tải về, chọn **Extract All...** (hoặc sử dụng phần mềm 7-Zip, WinRAR) để giải nén toàn bộ nội dung ra một thư mục trước khi mở game.
 
 ---
@@ -132,7 +132,7 @@ To download the ready-to-play Windows version:
 2. Go to the **Releases** tab on the right side of the screen.
 3. Select the release named: **`The Raumania - Alpha Version 1.0`**.
 4. Download the following asset file:
-   * **`The-Raumania-v1.0-Alpha.zip`** (approx. ~60MB).
+   * **`The-Raumania-v1.1.0-Alpha.zip`** (approx. ~60MB).
 5. Once downloaded, right-click and select **Extract All...** (or use 7-Zip / WinRAR) to unpack the zip into its own folder before launching the game.
 
 ---
